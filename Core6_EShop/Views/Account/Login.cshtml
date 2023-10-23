@@ -1,5 +1,45 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-@{
-}
+
+<div id="loginContainer">
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-12 mb-3 text-center" v-html="logoHtml">
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <h5 class="card-header text-center">登入</h5>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">電子郵件：</label>
+                        <input type="email" class="form-control" id="email" placeholder="xxxxx@example.com" v-model="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">密碼</label>
+                        <input type="password" class="form-control" id="password" v-model="password">
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary w-100" v-on:click="checkUser">登入</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="font-inline">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <a href="#" class="card-link">忘記密碼?</a>
+                        </h6>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <a class="card-link" asp-area="" asp-controller="Account" asp-action="Register">註冊</a>
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/js/client/account/login.js"></script>

@@ -9,6 +9,13 @@
   <ItemGroup>
     <Folder Include="Controllers\Server\" />
     <Folder Include="Views\Server\" />
+    <Folder Include="wwwroot\js\server\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.15" />
+    <PackageReference Include="MySql.Data" Version="8.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

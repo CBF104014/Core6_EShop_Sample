@@ -2,14 +2,14 @@
     ViewData["Title"] = "Home Page";
 }
 <div>
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel" style="height: 35rem;">
+    <div id="homeContainer" class="carousel slide" data-bs-ride="carousel" style="height: 35rem;">
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#homeContainer" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#homeContainer" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#homeContainer" data-bs-slide-to="2" aria-label="Slide 3"></button>
         </div>
-        <div class="carousel-inner h-100">
-           @*  <div class="carousel-item active">
+@*         <div class="carousel-inner h-100">
+           <div class="carousel-item active">
                 <img src="/image/home/hom_10001.jpg" class="d-block w-100" alt="...">
             </div>
             <div class="carousel-item">
@@ -17,16 +17,29 @@
             </div>
             <div class="carousel-item">
                 <img src="/image/home/hom_10001.jpg" class="d-block w-100" alt="...">
-            </div> *@
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            </div>
+        </div> *@
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeContainer" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" data-bs-target="#homeContainer" data-bs-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
         </button>
     </div>
 </div>
-<script src="~/js/client/home/index.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const { createApp, ref } = Vue;
+        const appMain = createApp({
+            data() {
+                return {
+                }
+            },
+            methods: {
+            }
+        });
+        appMain.mount('#homeContainer');
+    });
+</script>

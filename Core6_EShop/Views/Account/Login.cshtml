@@ -42,4 +42,28 @@
         </div>
     </div>
 </div>
-<script src="~/js/client/account/login.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const { createApp, ref } = Vue;
+        const appMain = createApp({
+            data() {
+                return {
+                    logoHtml: document.getElementById('logo_Template').innerHTML,
+                    email: '',
+                    password: '',
+                }
+            },
+            methods: {
+                checkUser: async function (item) {
+                    var rs = await $$ajaxPromise('/Account/CheckUser', JSON.stringify({
+                        Id: this.email,
+                        Password: this.password,
+                    }));
+                    console.log(rs);
+                    $$showMsg(rs);
+                }
+            }
+        });
+        appMain.mount('#loginContainer');
+    });
+</script>

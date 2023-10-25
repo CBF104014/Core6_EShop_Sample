@@ -1,0 +1,125 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<div id="shopContainer">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="formGroupExampleInput" class="form-label">關鍵字：</label>
+                        <input type="text" class="form-control" id="formGroupExampleInput" placeholder="卯咪">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customRange2" class="form-label">價格：</label>
+                        <input type="range" class="form-range" min="0" max="5" id="customRange2">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="row mb-3">
+                <div class="col-md-12 mb-3">
+                    <div class="btn-group">
+                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            排序
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">名稱</a></li>
+                            <li><a class="dropdown-item" href="#">發布日期</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <template v-for="(item, index) in mainData.goodsDatas">
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card mb-3">
+                            <img src="~/image/shop/sample.jpg" class="card-img-top" alt="..." />
+                            <div class="card-body">
+                                <h5 class="card-title" v-model="title">{{item.goodName}}</h5>
+                                <p class="card-text" v-model="desc">{{item.goodDesc}}</p>
+                                <p class="card-text"><small class="text-muted">{{item.goodPrice}}</small></p>
+                                <button type="button" class="btn btn-primary w-100" v-on:click="more">{{index}}查看</button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-auto">
+                    <select v-model="mainData.shopDtoData.perPageNum">
+                        <option v-for="option in mainData.shopDtoData.perPageNumList">
+                            {{ option }}
+                        </option>
+                    </select>
+                </div>
+                <div class="col">
+                    <nav aria-label="...">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item disabled">
+                                <span class="page-link">上一頁</span>
+                            </li>
+                            <template v-for="item in mainData.shopDtoData.pageCountList">
+                                <li :class="[item.active ? 'active' : '', 'page-item']" v-on:click="gotoPage(item)">
+                                    <a class="page-link" href="#">{{ item.pageNum }}</a>
+                                </li>
+                            </template>
+                            <li class="page-item">
+                                <a class="page-link" href="#">下一頁</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const { createApp, ref } = Vue;
+        // var viewModel = {
+        //     currentPageNum: 1,
+        //     perPageNum: 20,
+        //     sortType: 1,
+        //     searchKey: '',
+        //     minPrice: 1,
+        //     maxPrice: 10000,
+        //     goodDatas: [{ goodName: 'Foo' }, { goodName: 'Bar' }],
+        //     pageDatas: [{ pageNum: 1, active: true }, { pageNum: 2, active: false }],
+        // };
+        async function loadData(_jsonParameter = '') {
+            var resultData = await $$ajaxPromise('/Shop/GetData', _jsonParameter);
+            console.log(resultData.payload);
+            const appMain = createApp({
+                data() {
+                    return {
+                        mainData: resultData.payload.shopViewModelData
+                    };
+                },
+                computed: {},
+                watch: {
+                    'mainData.shopDtoData.perPageNum': {
+                        async handler(newValue, oldValue) {
+                            var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
+                            this.mainData = resultData.payload.shopViewModelData;
+                        },
+                    },
+                },
+                methods: {
+                    async gotoPage(itemObj) {
+                        this.mainData.shopDtoData.currentPageNum = itemObj.pageNum;
+                        var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
+                        this.mainData = resultData.payload.shopViewModelData;
+                    },
+                    async more() {
+                        console.log(123);
+                    },
+                }
+            });
+            appMain.mount('#shopContainer');
+        }
+        await loadData();
+    });
+</script>

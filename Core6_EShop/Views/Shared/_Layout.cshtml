@@ -11,6 +11,7 @@
 </head>
 <body>
     <header id="headerContainer">
+        <div id="loderElement" class="d-none" v-html="loderHtml"></div>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <div v-html="logoHtml"></div>
@@ -25,6 +26,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">帳戶</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">商品</a>
                         </li>
                     </ul>
                     <div class="navbar-brand">
@@ -89,13 +93,21 @@
         EShop
     </a>
 </template>
+<template id="loader_Template">
+    <div class="d-flex justify-content-center align-items-center h-100 w-100" style="position:fixed;z-index:10000;background-color:#d0e0ee4d">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</template>
 <script>
     (() => {
         const { createApp, ref } = Vue;
         const appMain = createApp({
             data() {
                 return {
-                    logoHtml: document.getElementById('logo_Template').innerHTML
+                    logoHtml: document.getElementById('logo_Template').innerHTML,
+                    loderHtml: document.getElementById('loader_Template').innerHTML,
                 }
             }
         });

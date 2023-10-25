@@ -6,6 +6,14 @@ namespace Core6_EShop.Cls
 {
     public static class Code
     {
+        public enum stateCode
+        {
+            error = -1,
+            info = 0,
+            success = 1,
+            warning = 2,
+            question = 3,
+        }
         public static T Mapping<T>(this object _data)
         {
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(_data));

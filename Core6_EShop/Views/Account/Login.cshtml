@@ -49,7 +49,7 @@
             data() {
                 return {
                     logoHtml: document.getElementById('logo_Template').innerHTML,
-                    email: '',
+                    email: 'xx',
                     password: '',
                 }
             },
@@ -60,7 +60,11 @@
                         Password: this.password,
                     }));
                     console.log(rs);
-                    $$showMsg(rs);
+                    localStorage.setItem('jwtToken', rs.payload.token);
+                    localStorage.setItem('name', rs.payload.name);
+                    $$showMsg(rs).then(() => {
+                        location.href = window.location.origin;
+                    });
                 }
             }
         });

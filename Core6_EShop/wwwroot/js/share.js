@@ -1,28 +1,37 @@
 ﻿//共用js
 function $$showMsg(_parameter = {}) {
-    return Swal.fire({
-        title: _parameter.title == null ? '' : _parameter.title,
-        text: _parameter.message == null ? '' : _parameter.message,
-        icon: _parameter.icon == null ? 'info' : _parameter.icon,
-        allowOutsideClick: false,
-        showCloseButton: true,
-        showCancelButton: false,
-        confirmButtonText: '確定',
-        cancelButtonText: '取消',
-    });
+    if (_parameter == null)
+        _parameter = {};
+    _parameter.title = _parameter.title == null ? '' : _parameter.title;
+    _parameter.text = _parameter.message == null ? '' : _parameter.message;
+    _parameter.icon = _parameter.icon == null ? 'info' : _parameter.icon;
+    _parameter.allowOutsideClick = _parameter.allowOutsideClick == null ? false : _parameter.allowOutsideClick;
+    _parameter.showCloseButton = _parameter.showCloseButton == null ? true : _parameter.showCloseButton;
+    _parameter.showCancelButton = _parameter.showCancelButton == null ? false : _parameter.showCancelButton;
+    _parameter.confirmButtonText = _parameter.confirmButtonText == null ? '確定' : _parameter.confirmButtonText;
+    _parameter.cancelButtonText = _parameter.cancelButtonText == null ? '取消' : _parameter.cancelButtonText;
+    return Swal.fire(_parameter);
 }
 function $$loder(_start = true) {
     document.getElementById('loderElement').classList.remove('d-none');
     if (_start != true)
         document.getElementById('loderElement').classList.add('d-none');
 }
+function $$isNullorEmpty(_val) {
+    return _val === null || _val === undefined || _val === ''; 
+}
 function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
+    //若須驗證需在後端加上[Authorize]屬性
     return new Promise((_resolve, _reject) => {
         if (loaderAni == true)
             $$loder(true);
+        const jwtToken = localStorage.getItem('jwtToken');
         $.ajax({
             type: "POST",
             url: _url,
+            headers: {
+                'Authorization': 'Bearer ' + jwtToken
+            },
             data: _josnParameter,
             contentType: "application/json",
             success: function (rs) {
@@ -30,9 +39,23 @@ function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
                 $$loder(false);
             },
             error: function (rs) {
-                $$showMsg({ title: '錯誤', message: '錯誤', icon: 'error' });
                 $$loder(false);
-                _reject();
+                _reject(rs);
+                if (rs.status == 401) {
+                    //未授權(未登入)
+                    localStorage.clear();
+                    $$showMsg({
+                        title: '請先登入',
+                        message: '',
+                        icon: '',
+                        timer: 10000,
+                        timerProgressBar: true,
+                    }).then(() => {
+                        location.href = window.location.origin + '/Account/Login';
+                    });
+                } else {
+                    $$showMsg({ title: '錯誤', message: '錯誤', icon: 'error' });
+                }
             }
         });
     });

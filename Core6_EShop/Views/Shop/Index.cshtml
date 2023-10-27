@@ -1,15 +1,14 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-
 <div id="shopContainer">
     <div class="row mb-3">
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="formGroupExampleInput" class="form-label">關鍵字：</label>
-                        <input type="text" class="form-control" id="formGroupExampleInput" placeholder="卯咪">
+                        <label class="form-label">關鍵字：</label>
+                        <input type="text" class="form-control" placeholder="卯咪" v-model="mainData.shopDtoData.searchKey">
                     </div>
                     <div class="mb-3">
                         <label for="customRange2" class="form-label">價格：</label>
@@ -79,16 +78,6 @@
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
         const { createApp, ref } = Vue;
-        // var viewModel = {
-        //     currentPageNum: 1,
-        //     perPageNum: 20,
-        //     sortType: 1,
-        //     searchKey: '',
-        //     minPrice: 1,
-        //     maxPrice: 10000,
-        //     goodDatas: [{ goodName: 'Foo' }, { goodName: 'Bar' }],
-        //     pageDatas: [{ pageNum: 1, active: true }, { pageNum: 2, active: false }],
-        // };
         async function loadData(_jsonParameter = '') {
             var resultData = await $$ajaxPromise('/Shop/GetData', _jsonParameter);
             console.log(resultData.payload);
@@ -122,4 +111,14 @@
         }
         await loadData();
     });
+    // var viewModel = {
+    //     currentPageNum: 1,
+    //     perPageNum: 20,
+    //     sortType: 1,
+    //     searchKey: '',
+    //     minPrice: 1,
+    //     maxPrice: 10000,
+    //     goodDatas: [{ goodName: 'Foo' }, { goodName: 'Bar' }],
+    //     pageDatas: [{ pageNum: 1, active: true }, { pageNum: 2, active: false }],
+    // };
 </script>

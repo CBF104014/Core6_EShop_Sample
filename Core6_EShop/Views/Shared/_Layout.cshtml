@@ -25,40 +25,36 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">帳戶</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="UserInfo">帳戶</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">商品</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index" data-jwt="true">商品</a>
                         </li>
                     </ul>
                     <div class="navbar-brand">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-light">
-                                <svg width="20" height="20" fill="currentColor" class="bi bi-cart4" viewBox="0 0 16 16">
-                                    <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l.5 2H5V5H3.14zM6 5v2h2V5H6zm3 0v2h2V5H9zm3 0v2h1.36l.5-2H12zm1.11 3H12v2h.61l.5-2zM11 8H9v2h2V8zM8 8H6v2h2V8zM5 8H3.89l.5 2H5V8zm0 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" />
+                        <div class="dropdown">
+                            <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z" />
                                 </svg>
+                                <span>{{userId}}</span>
+                                &nbsp;
                             </button>
-                            <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                                <span class="visually-hidden">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="cartDropdown">
+                            <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="accountDropdown">
+                                <li><a class="dropdown-item" v-if="!isLogin" asp-area="" asp-controller="Account" asp-action="Login">登入</a></li>
+                                <li><a class="dropdown-item" v-if="isLogin" v-on:click="logout">登出</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">註冊</a></li>
                             </ul>
                         </div>
                     </div>
                     <div class="navbar-brand">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-light">
-                                <svg width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
-                                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z" />
+                        <div class="dropdown">
+                            <button class="btn btn-light dropdown-toggle" type="button" aria-expanded="false" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" v-on:click="getCart(item)">
+                                <svg width="20" height="20" fill="currentColor" class="bi bi-cart4" viewBox="0 0 16 16">
+                                    <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l.5 2H5V5H3.14zM6 5v2h2V5H6zm3 0v2h2V5H9zm3 0v2h1.36l.5-2H12zm1.11 3H12v2h.61l.5-2zM11 8H9v2h2V8zM8 8H6v2h2V8zM5 8H3.89l.5 2H5V8zm0 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" />
                                 </svg>
+                                &nbsp;
                             </button>
-                            <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                                <span class="visually-hidden">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="accountDropdown">
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Login">登入</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">註冊</a></li>
-                            </ul>
                         </div>
                     </div>
                 </div>
@@ -100,6 +96,42 @@
         </div>
     </div>
 </template>
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasRightLabel">購物車清單</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ol class="list-group list-group-numbered">
+
+            <template v-for="item in mainData.shopDtoData.pageCountList">
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">
+                            {{goodName}}
+                        </div>
+                        {{goodDesc}}
+                    </div>
+                    <span class="badge bg-primary rounded-pill">14</span>
+                </li>
+            </template>
+            @* <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">Subheading</div>
+                    Content for list item
+                </div>
+                <span class="badge bg-primary rounded-pill">14</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">Subheading</div>
+                    Content for list item
+                </div>
+                <span class="badge bg-primary rounded-pill">14</span>
+            </li> *@
+        </ol>
+    </div>
+</div>
 <script>
     (() => {
         const { createApp, ref } = Vue;
@@ -108,8 +140,27 @@
                 return {
                     logoHtml: document.getElementById('logo_Template').innerHTML,
                     loderHtml: document.getElementById('loader_Template').innerHTML,
+                    userId: $$isNullorEmpty(localStorage.getItem('name')) ? '' : localStorage.getItem('name'),
+                    cartDatas: [],
                 }
-            }
+            },
+            computed: {
+                isLogin() {
+                    return !$$isNullorEmpty(this.userId);
+                }
+            },
+            methods: {
+                async getCart() {
+                    var resultData = await $$ajaxPromise('/Cart/GetCart', JSON.stringify("xx"));
+                    console.log(resultData.payload.cartDatas);
+                    this.cartDatas = resultData.payload.cartDatas;
+                },
+                logout() { 
+                    localStorage.clear();
+                    location.href = window.location.origin;
+                },
+            },
+            mounted() { }
         });
         appMain.mount('#headerContainer');
     })();

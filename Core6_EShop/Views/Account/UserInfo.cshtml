@@ -1,0 +1,92 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<div id="userInfoContainer">
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-6">
+            <div class="card-header text-center">
+                <h5>會員</h5>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label">姓名：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.name">
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="mb-3">
+                                <label class="form-label">電子郵件：</label>
+                                <input type="email" class="form-control" placeholder="" v-model="mainData.userData.id">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label">國家：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.country">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label">城市：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.city">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <label class="form-label">郵遞區號：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.zipCode">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label">地址：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">手機號碼：</label>
+                                <input type="tel" class="form-control" placeholder="" v-model="mainData.userData.phone">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const { createApp, ref } = Vue;
+        async function loadData(_jsonParameter = '') {
+            var resultData = await $$ajaxPromise('/Account/GetUserData', _jsonParameter);
+            console.log(resultData.payload.userData);
+            const appMain = createApp({
+                data() {
+                    return {
+                        mainData: {
+                            userData: resultData.payload.userData
+                        }
+                    };
+                },
+                computed: {},
+                watch: {},
+                methods: {
+                    async gotoPage(itemObj) {
+                        // this.mainData.shopDtoData.currentPageNum = itemObj.pageNum;
+                        // var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
+                        // this.mainData = resultData.payload.shopViewModelData;
+                    },
+                    async more() {
+                        console.log(123);
+                    },
+                }
+            });
+            appMain.mount('#userInfoContainer');
+        }
+        await loadData();
+    });
+</script>

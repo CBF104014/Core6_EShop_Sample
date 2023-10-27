@@ -1,4 +1,5 @@
 ﻿using Core6_EShop.Cls;
+using Core6_EShop.Dto;
 using Core6_EShop.Models;
 using Core6_EShop.Service.Base;
 using Core6_EShop.ViewModel;
@@ -20,18 +21,34 @@ namespace Core6_EShop.Service.Implement
         {
             return _mySqlTool.Create(goodsData);
         }
-
-        public ShopViewModel GetDefaultShopData()
+        /// <summary>
+        /// 取預設值
+        /// </summary>
+        public ShopDto GetDefaultShopData()
         {
+            return new Dto.ShopDto()
+            {
+                currentPageNum = 1,
+                sortType = 0,
+                perPageNum = 20,
+            }.Init();
+        }
+        /// <summary>
+        /// 篩選後商品資料
+        /// </summary>
+        public ShopViewModel SelByFilter(ShopDto shopDtoData)
+        {
+            if (shopDtoData == null)
+                shopDtoData = GetDefaultShopData();
+            var goodsDatas = SelAll((shopDtoData.currentPageNum - 1) * shopDtoData.perPageNum, shopDtoData.perPageNum);
+            var allGoodsCount = GetCount();
+            shopDtoData.pageCount = Convert.ToInt32(Math.Ceiling((decimal)allGoodsCount / shopDtoData.perPageNum));
+            if (shopDtoData.currentPageNum > shopDtoData.pageCount)
+                shopDtoData.currentPageNum = shopDtoData.pageCount;
             return new ShopViewModel()
             {
-                ShopDtoData = new Dto.ShopDto()
-                {
-                    currentPageNum = 1,
-                    sortType = 0,
-                    perPageNum = 20,
-                }.Init(),
-                GoodsDatas = new List<Goods>(),
+                ShopDtoData = shopDtoData,
+                GoodsDatas = goodsDatas,
             };
         }
     }

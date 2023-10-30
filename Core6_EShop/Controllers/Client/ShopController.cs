@@ -18,6 +18,10 @@ namespace Core6_EShop.Controllers.Client
         {
             return View();
         }
+        public IActionResult GoodsDetail()
+        {
+            return View();
+        }
         [HttpPost]
         public IActionResult GetData([FromBody] ShopDto shopDtoData)
         {
@@ -25,6 +29,15 @@ namespace Core6_EShop.Controllers.Client
             return Json(new APIDto((int)stateCode.success, "", "", new
             {
                 shopViewModelData
+            }));
+        }
+        [HttpPost]
+        public IActionResult GetGoodsData([FromBody] long Rankey)
+        {
+            var goodsData = _goodsService.SelByRankey(Rankey);
+            return Json(new APIDto((int)stateCode.success, "", "", new
+            {
+                goodsData
             }));
         }
     }

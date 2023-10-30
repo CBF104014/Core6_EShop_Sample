@@ -1,4 +1,8 @@
-﻿//共用js
+﻿//=======
+//共用js
+//=======
+
+//開啟訊息視窗
 function $$showMsg(_parameter = {}) {
     if (_parameter == null)
         _parameter = {};
@@ -12,14 +16,17 @@ function $$showMsg(_parameter = {}) {
     _parameter.cancelButtonText = _parameter.cancelButtonText == null ? '取消' : _parameter.cancelButtonText;
     return Swal.fire(_parameter);
 }
+//載入動畫
 function $$loder(_start = true) {
     document.getElementById('loderElement').classList.remove('d-none');
     if (_start != true)
         document.getElementById('loderElement').classList.add('d-none');
 }
+//是否為空值或null
 function $$isNullorEmpty(_val) {
     return _val === null || _val === undefined || _val === ''; 
 }
+//ajax使用promise
 function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
     //若須驗證需在後端加上[Authorize]屬性
     return new Promise((_resolve, _reject) => {
@@ -60,26 +67,33 @@ function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
         });
     });
 }
-
-function $$setCookie(cname, cvalue, exdays) {
-    const d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    let expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-
-function $$getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
+//數字千分位
+function $$toCurrency(_num, _decimalLenght = null) {
+    if (_num == null) return;
+    var parts = _num.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (!$$isNullorEmpty(_decimalLenght) && !$$isNullorEmpty(parts[1])) {
+        parts[1] = parts[1].substring(0, _decimalLenght);
+        if (parts[1] == '')
+            parts.splice(1, 1);
     }
-    return "";
+    return parts.join('.');
+}
+//小數處理
+function $$safeRound(v, n) {
+    if (v % 1 !== 0) {
+        v = parseFloat(v.toPrecision(15));
+    }
+    var t = Math.pow(10, n);
+    var nv = v * t;
+    if (nv % 1 !== 0) {
+        nv = parseFloat(nv.toPrecision(15));
+    }
+    return Math.round(nv) / t;
+}
+//轉數字
+function $$toNum(_num, _decimalPlace = 2) {
+    if ($$isNullorEmpty(_num))
+        return 0;
+    return $$safeRound(_num, _decimalPlace);
 }

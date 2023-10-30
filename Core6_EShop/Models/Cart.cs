@@ -2,6 +2,7 @@
 {
     public class Cart
     {
+        public long Rankey { get; set; }
         public string Id { get; set; }
         public string GType1 { get; set; }
         public string GType2 { get; set; }

@@ -1,0 +1,45 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<div id="goodDetailContainer">
+    <div class="row mb-3">
+        <div class="col-md-auto">
+            <img src="~/image/shop/sample.jpg" class="img-fluid" alt="...">
+        </div>
+        <div class="col">
+            <h4>
+                <strong>{{mainData.goodName}}</strong>
+            </h4>
+            <h6>
+                {{mainData.goodDesc}}
+            </h6>
+            <h6>
+                ${{mainData.goodPrice}}
+            </h6>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const { createApp, ref } = Vue;
+        async function loadData(_jsonParameter = '') {
+            var resultData = await $$ajaxPromise('/Shop/GetGoodsData', _jsonParameter);
+            console.log(resultData.payload);
+            const appMain = createApp({
+                data() {
+                    return {
+                        mainData: resultData.payload.goodsData
+                    };
+                },
+                computed: {
+                },
+                watch: {
+                },
+                methods: {
+                }
+            });
+            appMain.mount('#goodDetailContainer');
+        }
+        await loadData(JSON.stringify(1));
+    });
+</script>

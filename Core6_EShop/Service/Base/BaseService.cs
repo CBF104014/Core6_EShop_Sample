@@ -12,7 +12,7 @@ namespace Core6_EShop.Service.Base
         {
             this._mySqlTool = new MySqlTool<T>();
         }
-        public T SelByRankey(int rankey)
+        public T SelByRankey(long rankey)
         {
             return _mySqlTool.Read("Rankey=@Rankey", new Dictionary<string, object>()
             {

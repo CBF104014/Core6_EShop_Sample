@@ -16,3 +16,11 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/*¦Û©w¸q*/
+strong {
+    word-wrap: break-word;
+}
+input[type=tel] {
+    text-align: right;
+}

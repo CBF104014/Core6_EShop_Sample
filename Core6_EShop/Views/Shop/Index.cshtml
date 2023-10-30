@@ -19,9 +19,9 @@
         </div>
         <div class="col-md-9">
             <div class="row mb-3">
-                <div class="col-md-12 mb-3">
+                <div class="col-md-12">
                     <div class="btn-group">
-                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             排序
                         </button>
                         <ul class="dropdown-menu">
@@ -32,15 +32,17 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <template v-for="(item, index) in mainData.goodsDatas">
+                <template v-for="(item, index) in goodsVMDatas">
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="card mb-3">
                             <img src="~/image/shop/sample.jpg" class="card-img-top" alt="..." />
                             <div class="card-body">
-                                <h5 class="card-title" v-model="title">{{item.goodName}}</h5>
-                                <p class="card-text" v-model="desc">{{item.goodDesc}}</p>
-                                <p class="card-text"><small class="text-muted">{{item.goodPrice}}</small></p>
-                                <button type="button" class="btn btn-primary w-100" v-on:click="more">{{index}}查看</button>
+                                <h5 class="card-title">{{item.goodName}}</h5>
+                                <p class="card-text">{{item.goodDesc}}</p>
+                                <p class="card-text"><small class="text-muted">${{item.goodPrice}}</small></p>
+                                <button type="button" class="btn btn-primary w-100" v-on:click="more(item)">
+                                    <a class="nav-link p-0 text-white" asp-area="" asp-controller="Shop" asp-action="GoodsDetail" data-jwt="true">查看</a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -48,7 +50,7 @@
             </div>
             <div class="row mb-3">
                 <div class="col-md-auto">
-                    <select v-model="mainData.shopDtoData.perPageNum">
+                    <select class="form-select" v-model="mainData.shopDtoData.perPageNum">
                         <option v-for="option in mainData.shopDtoData.perPageNumList">
                             {{ option }}
                         </option>
@@ -87,7 +89,11 @@
                         mainData: resultData.payload.shopViewModelData
                     };
                 },
-                computed: {},
+                computed: {
+                    goodsVMDatas() {
+                        return this.mainData.goodsDatas;
+                    }
+                },
                 watch: {
                     'mainData.shopDtoData.perPageNum': {
                         async handler(newValue, oldValue) {
@@ -102,8 +108,8 @@
                         var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
                         this.mainData = resultData.payload.shopViewModelData;
                     },
-                    async more() {
-                        console.log(123);
+                    async more(_item) {
+                        console.log(_item);
                     },
                 }
             });

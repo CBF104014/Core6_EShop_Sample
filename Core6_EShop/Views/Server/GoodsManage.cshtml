@@ -1,0 +1,78 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<link href="~/lib/cropper/cropper.min.css" rel="stylesheet" />
+<script src="~/lib/cropper/cropper.min.js"></script>
+<div id="goodsManageContainer">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <img id="image" src="~/image/shop/sample.jpg" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="input-group">
+                <input type="file" class="form-control" v-on:change="handleFiles">
+                <button class="btn btn-secondary" type="button" data-bind="click: ()=>{PreView()}">預覽檔案</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const { createApp, ref } = Vue;
+        async function loadData(_jsonParameter = '') {
+            // var resultData = await $$ajaxPromise('/Shop/GetData', _jsonParameter);
+            // console.log(resultData.payload);
+            const appMain = createApp({
+                data() {
+                    return {
+                        mainData: {}
+                        // mainData: resultData.payload.shopViewModelData
+                    };
+                },
+                computed: {
+                },
+                watch: {
+                },
+                methods: {
+                    handleFiles: function (element) {
+                        let file = element.target.files[0];
+                        let reader = new FileReader();
+                        reader.onload = () => {
+                            this.convert(reader.result);
+                        };
+                        reader.readAsText(file);
+                    },
+                    convert: function (str) {
+                        //TODO
+                    }
+                }
+            });
+            appMain.mount('#goodsManageContainer');
+        }
+        await loadData();
+
+
+        // import Cropper from 'cropperjs';
+
+        const image = document.getElementById('image');
+        const cropper = new Cropper(image, {
+            aspectRatio: 1,
+            cropBoxResizable: false,
+            crop(event) {
+                // console.log(event.detail.x);
+                // console.log(event.detail.y);
+                // console.log(event.detail.width);
+                // console.log(event.detail.height);
+                // console.log(event.detail.rotate);
+                // console.log(event.detail.scaleX);
+                // console.log(event.detail.scaleY);
+            },
+        });
+
+
+    });
+</script>

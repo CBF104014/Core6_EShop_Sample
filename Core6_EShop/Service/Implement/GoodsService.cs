@@ -40,7 +40,7 @@ namespace Core6_EShop.Service.Implement
         {
             if (shopDtoData == null)
                 shopDtoData = GetDefaultShopData();
-            var goodsDatas = SelAll((shopDtoData.currentPageNum - 1) * shopDtoData.perPageNum, shopDtoData.perPageNum);
+            var goodsDatas = SelAll<GoodsViewModel>((shopDtoData.currentPageNum - 1) * shopDtoData.perPageNum, shopDtoData.perPageNum);
             var allGoodsCount = GetCount();
             shopDtoData.pageCount = Convert.ToInt32(Math.Ceiling((decimal)allGoodsCount / shopDtoData.perPageNum));
             if (shopDtoData.currentPageNum > shopDtoData.pageCount)
@@ -50,6 +50,16 @@ namespace Core6_EShop.Service.Implement
                 ShopDtoData = shopDtoData,
                 GoodsDatas = goodsDatas,
             };
+        }
+        /// <summary>
+        /// 寫入商品
+        /// </summary>
+        public void CreateGoods(IWebHostEnvironment _webHostEnvironment, GoodsViewModel goodsData)
+        {
+            goodsData.basePath = _webHostEnvironment.WebRootPath;
+            Directory.CreateDirectory(goodsData.fullPathWithoutImage);
+            File.WriteAllBytes(goodsData.fullPath, goodsData.fileData.byteData);
+            Add(goodsData.Mapping<Goods>());
         }
     }
 }

@@ -35,7 +35,8 @@
                 <template v-for="(item, index) in goodsVMDatas">
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="card mb-3">
-                            <img src="~/image/shop/sample.jpg" class="card-img-top" alt="..." />
+                            @* <img src="~/image/shop/sample.jpg" class="card-img-top" alt="..." /> *@
+                            <img v-bind:src="getImagePath(item.imagePath)" class="card-img-top" alt="..." /> 
                             <div class="card-body">
                                 <h5 class="card-title">{{item.goodName}}</h5>
                                 <p class="card-text">{{item.goodDesc}}</p>
@@ -92,6 +93,9 @@
                 computed: {
                     goodsVMDatas() {
                         return this.mainData.goodsDatas;
+                    },
+                    localImagePath() { 
+                    
                     }
                 },
                 watch: {
@@ -110,6 +114,9 @@
                     },
                     async more(_item) {
                         console.log(_item);
+                    },
+                    getImagePath(_path) { 
+                        return '/' + _path.replaceAll('\\', '/') + '/main.jpg';
                     },
                 }
             });

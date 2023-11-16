@@ -59,9 +59,9 @@
                         Id: this.email,
                         Password: this.password,
                     }));
-                    console.log(rs);
-                    localStorage.setItem('jwtToken', rs.payload.token);
-                    localStorage.setItem('name', rs.payload.name);
+                    // console.log(rs);
+                    $$setCookie('jwtToken', rs.payload.token, 24);
+                    $$setCookie('userName', rs.payload.name, 24);
                     $$showMsg(rs).then(() => {
                         location.href = window.location.origin;
                     });

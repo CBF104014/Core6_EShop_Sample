@@ -33,6 +33,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Server" asp-action="GoodsManage">商品管理(Admin)</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Server" asp-action="CodeManage">代碼管理(Admin)</a>
+                        </li>
                     </ul>
                     <div class="navbar-brand">
                         <div class="dropdown">
@@ -138,6 +141,7 @@
     <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
     @* ---global common js--- *@
     <script src="~/js/share.js" asp-append-version="true"></script>
+    <script src="~/js/model.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
@@ -164,7 +168,7 @@
                 return {
                     logoHtml: document.getElementById('logo_Template').innerHTML,
                     loderHtml: document.getElementById('loader_Template').innerHTML,
-                    userId: $$isNullorEmpty(localStorage.getItem('name')) ? '' : localStorage.getItem('name'),
+                    userId: $$isNullorEmpty($$getCookie('userName')) ? '' : $$getCookie('userName'),
                     cartDatas: [],
                 }
             },
@@ -189,8 +193,9 @@
                     // console.log(resultData.payload.cartDatas);
                     this.cartDatas = resultData.payload.cartDatas;
                 },
-                logout() { 
-                    localStorage.clear();
+                logout() {
+                    $$deleteCookie('jwtToken');
+                    $$deleteCookie('userName');
                     location.href = window.location.origin;
                 },
                 cartItemQuantityAdd(_item, _addNum = 0) {

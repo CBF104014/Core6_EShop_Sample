@@ -32,7 +32,7 @@ function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
     return new Promise((_resolve, _reject) => {
         if (loaderAni == true)
             $$loder(true);
-        const jwtToken = localStorage.getItem('jwtToken');
+        const jwtToken = $$getCookie('jwtToken');
         $.ajax({
             type: "POST",
             url: _url,
@@ -50,7 +50,8 @@ function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
                 _reject(rs);
                 if (rs.status == 401) {
                     //未授權(未登入)
-                    localStorage.clear();
+                    $$deleteCookie('jwtToken');
+                    $$deleteCookie('userName');
                     $$showMsg({
                         title: '請先登入',
                         message: '',
@@ -96,4 +97,73 @@ function $$toNum(_num, _decimalPlace = 2) {
     if ($$isNullorEmpty(_num))
         return 0;
     return $$safeRound(_num, _decimalPlace);
+}
+//設置cookie
+function $$setCookie(_name, _val, _hour = 1) {
+    var date = new Date();
+    date.setTime(date.getTime() + ((60 * 60 * 1000) * _hour));
+    document.cookie = `${_name}=${_val};expires=${date.toGMTString()};path=/`;
+}
+function $$getCookie(_name) {
+    var nameEQ = _name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+function $$deleteCookie(_name) {
+    document.cookie = _name + '=; Max-Age=-99999999;';
+}
+
+//附件預覽
+function $$previewFile(name, type, obj) {
+    type = String(type).toLowerCase();
+    function $$base64ToArrayBuffer(base64) {
+        var binaryString = window.atob(base64);
+        var binaryLen = binaryString.length;
+        var bytes = new Uint8Array(binaryLen);
+        for (var i = 0; i < binaryLen; i++) {
+            var ascii = binaryString.charCodeAt(i);
+            bytes[i] = ascii;
+        }
+        return bytes;
+    }
+    function $$saveByteArray(filename, type, byte) {
+        var blob = new Blob([byte], { type: `application/${type}` });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${filename}.${type}`;
+        link.click();
+    };
+    switch (type) {
+        case "pdf":
+            if (name == null || name == '') name = '附件';
+            var byteArray = $$base64ToArrayBuffer(obj);
+            var file = new Blob([byteArray], { type: `application/${type};base64` });
+            var fileURL = URL.createObjectURL(file);
+            window.open(fileURL, `預覽檔案${new Date().getTime()}`, "height=85%");
+            break;
+        case "jpeg":
+        case "jpg":
+        case "bmp":
+        case "png":
+        case "gif":
+            var img = `<img src='data:image/${type};base64,${obj}'">`;
+            var win = window.open("", `預覽檔案${new Date().getTime()}`, "height=85%");
+            win.document.write(img);
+            break;
+        default:
+            if (obj == "" || obj == null) {
+                $$showMsg({ title: `無文件可下載`, message: '', icon: 'info' });
+                return;
+            }
+            var base64Arr = $$base64ToArrayBuffer(obj);
+            if (name == '' || name == null)
+                name = `附件${new Date().getTime()}`;
+            $$saveByteArray(name, type, base64Arr);
+            break;
+    }
 }

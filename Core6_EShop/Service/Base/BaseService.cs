@@ -24,6 +24,11 @@ namespace Core6_EShop.Service.Base
             var sqlCmd = $"select * from {_mySqlTool.TableName} {(count == 0 ? "" : $"limit {start},{count}")}";
             return _mySqlTool.Query<T>(sqlCmd);
         }
+        public IEnumerable<T1> SelAll<T1>(int start = 0, int count = 0)
+        {
+            var sqlCmd = $"select * from {_mySqlTool.TableName} {(count == 0 ? "" : $"limit {start},{count}")}";
+            return _mySqlTool.Query<T1>(sqlCmd);
+        }
         public int GetCount()
         {
             var sqlCmd = $"select count(Rankey) count from {_mySqlTool.TableName}";

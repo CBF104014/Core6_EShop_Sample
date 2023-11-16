@@ -9,10 +9,13 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.15" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.23" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.0.3" />
     <PackageReference Include="MySql.Data" Version="8.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\image\goods\" />
   </ItemGroup>
 
 </Project>

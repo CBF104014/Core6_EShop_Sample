@@ -7,6 +7,6 @@ namespace Core6_EShop.ViewModel
     public class ShopViewModel
     {
         public ShopDto ShopDtoData { get; set; }
-        public IEnumerable<Goods> GoodsDatas { get; set; }
+        public IEnumerable<GoodsViewModel> GoodsDatas { get; set; }
     }
 }

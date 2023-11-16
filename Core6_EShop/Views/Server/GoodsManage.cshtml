@@ -8,14 +8,41 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <img id="image" src="~/image/shop/sample.jpg" />
+                    <img id="image" :src="imageSrc" />
                 </div>
             </div>
         </div>
         <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">商品編號：</label>
+                        <input type="tel" class="form-control" v-model="mainData.goodsData.gId">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">分類1：</label>
+                        <input type="text" class="form-control" v-model="mainData.goodsData.gType1">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">分類2：</label>
+                        <input type="text" class="form-control" v-model="mainData.goodsData.gType2">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">檔名：</label>
+                        <input type="text" class="form-control" v-model="mainData.goodsData.fileData.fileName">
+                    </div>
+                </div>
+            </div>
             <div class="input-group">
-                <input type="file" class="form-control" v-on:change="handleFiles">
-                <button class="btn btn-secondary" type="button" data-bind="click: ()=>{PreView()}">預覽檔案</button>
+                <input type="file" class="form-control" v-on:change="fileGetData">
+                <button class="btn btn-secondary" type="button" v-on:click="filePreView">預覽檔案</button>
+                <button class="btn btn-secondary" type="button" v-on:click="getImage">取檔案</button>
             </div>
         </div>
     </div>
@@ -23,56 +50,58 @@
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
         const { createApp, ref } = Vue;
+        var cropper = new Cropper(document.getElementById('image'), {});
         async function loadData(_jsonParameter = '') {
-            // var resultData = await $$ajaxPromise('/Shop/GetData', _jsonParameter);
+            var resultData = await $$ajaxPromise('/Server/GetSampleData', _jsonParameter);
+            resultData.payload.goodsViewModelData.fileData = new $$fileBase();
             // console.log(resultData.payload);
             const appMain = createApp({
                 data() {
                     return {
-                        mainData: {}
-                        // mainData: resultData.payload.shopViewModelData
+                        mainData: {
+                            goodsData: resultData.payload.goodsViewModelData,
+                        }
                     };
                 },
                 computed: {
+                    imageSrc: function () {
+                        if (this.mainData.goodsData.fileData.byteData == null)
+                            return '';
+                        return `data:image/${this.mainData.goodsData.fileData.fileType};base64,${this.mainData.goodsData.fileData.byteData}`;
+                    }
                 },
                 watch: {
                 },
                 methods: {
-                    handleFiles: function (element) {
-                        let file = element.target.files[0];
-                        let reader = new FileReader();
-                        reader.onload = () => {
-                            this.convert(reader.result);
-                        };
-                        reader.readAsText(file);
+                    fileGetData: async function (element) {
+                        var rs = await this.mainData.goodsData.fileData.GetFile(element);
+                        console.log(rs);
+                        if (rs != true)
+                            return;
+                        cropper.destroy();
+                        cropper = new Cropper(document.getElementById('image'), {
+                            aspectRatio: 1,
+                            cropBoxResizable: false,
+                            crop(event) {
+                            },
+                        });
                     },
-                    convert: function (str) {
+                    filePreView: function (element) {
+                        this.mainData.goodsData.fileData.PreView();
+                    },
+                    getImage: async function (str) {
                         //TODO
+                        var imageBase64 = cropper
+                            .getCroppedCanvas()
+                            .toDataURL()
+                            .split("base64,")[1];
+                        this.mainData.goodsData.fileData.byteData = imageBase64;
+                        var resultData = await $$ajaxPromise('/Server/UpdateImg', JSON.stringify(this.mainData.goodsData));
                     }
                 }
             });
             appMain.mount('#goodsManageContainer');
         }
         await loadData();
-
-
-        // import Cropper from 'cropperjs';
-
-        const image = document.getElementById('image');
-        const cropper = new Cropper(image, {
-            aspectRatio: 1,
-            cropBoxResizable: false,
-            crop(event) {
-                // console.log(event.detail.x);
-                // console.log(event.detail.y);
-                // console.log(event.detail.width);
-                // console.log(event.detail.height);
-                // console.log(event.detail.rotate);
-                // console.log(event.detail.scaleX);
-                // console.log(event.detail.scaleY);
-            },
-        });
-
-
     });
 </script>

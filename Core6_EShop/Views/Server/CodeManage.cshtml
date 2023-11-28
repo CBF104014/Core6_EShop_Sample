@@ -3,3 +3,140 @@
 *@
 @{
 }
+<div id="codeManageContainer">
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                    <strong>附 件 上 傳</strong>
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                <div class="accordion-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <video height="200" id="sampleVideo" controls style="width:100%">
+                                        <source :src="imageSrc" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <input type="file" class="form-control" v-on:change="fileGetData">
+                                <button class="btn btn-secondary" type="button" v-on:click="filePreView">預覽檔案</button>
+                                <button class="btn btn-secondary" type="button" v-on:click="upload">上傳檔案</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo">
+                    <strong>附 件 資 料</strong>
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTwo">
+                <div class="accordion-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <button class="btn btn-secondary" type="button" v-on:click="getVideo">取資料</button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <template v-for="(item, index) in mainData.videoDatas">
+                            <div class="col-lg-4 col-sm-6">
+                                <div class="card mb-3">
+                                    <video controls>
+                                        <source :src="item.videoSrc" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <div class="card-footer">
+                                        <div class="row">
+                                            <div class="col-md-auto">
+                                                <button class="btn btn-danger mr-1" type="button" v-on:click="deleteVideo(item)">刪除</button>
+                                            </div>
+                                            <div class="col-md-auto align-self-center">
+                                                <label>{{item.name}}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const { createApp, ref } = Vue;
+        async function loadData(_jsonParameter = '') {
+            var resultData = {
+                codeData: {
+                    fileData: new $$fileBase(),
+                }
+            };
+            resultData.codeData.fileData.limitFileSize = 100;
+            resultData.codeData.fileData.limitFileTypeArr = {
+                'mp4': 'video/mp4',
+            };
+            const appMain = createApp({
+                data() {
+                    return {
+                        mainData: {
+                            codeData: resultData.codeData,
+                            videoDatas: [],
+                        }
+                    };
+                },
+                computed: {
+                    imageSrc: function () {
+                        if (this.mainData.codeData.fileData.byteData == null)
+                            return '';
+                        return `data:video/${this.mainData.codeData.fileData.fileType};base64,${this.mainData.codeData.fileData.byteData}`;
+                    }
+                },
+                watch: {
+                },
+                methods: {
+                    fileGetData: async function (element) {
+                        var rs = await this.mainData.codeData.fileData.GetFile(element);
+                        document.getElementById('sampleVideo').load();
+                        console.log(rs);
+                        if (rs != true)
+                            return;
+                    },
+                    filePreView: function (element) {
+                        this.mainData.codeData.fileData.PreView();
+                    },
+                    upload: async function (str) {
+                        //TODO
+                        var resultData = await $$ajaxPromise('/Server/UploadVideo', JSON.stringify(this.mainData.codeData));
+                        $$showMsg(resultData);
+                    },
+                    getVideo: async function () {
+                        var resultData = await $$ajaxPromise('/Server/GetAllVideo');
+                        // console.log(resultData);
+                        this.mainData.videoDatas = resultData.payload.viedoFiles;
+                    },
+                    deleteVideo: async function (_param) {
+                        var resultData = await $$ajaxPromise('/Server/DeleteVideo', JSON.stringify(_param));
+                        // console.log(resultData);
+                        $$showMsg(resultData);
+                        this.getVideo();
+                    }
+                }
+            });
+            appMain.mount('#codeManageContainer');
+        }
+        await loadData();
+    });
+</script>

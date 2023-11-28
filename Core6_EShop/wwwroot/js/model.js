@@ -20,6 +20,9 @@ class $$fileBase {
         };
         this.byteData = _fileObj.byteData;
     }
+    IsImage() {
+        return this.fileType == 'png';
+    }
     Test() {
         debugger;
     }

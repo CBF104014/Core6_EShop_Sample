@@ -1,4 +1,7 @@
-﻿using Core6_EShop.Models;
+﻿using Core6_EShop.Cls;
+using Core6_EShop.Controllers.Base;
+using Core6_EShop.Dto;
+using Core6_EShop.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -7,7 +10,7 @@ using System.Diagnostics;
 
 namespace Core6_EShop.Controllers.Client
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
 
@@ -25,6 +28,18 @@ namespace Core6_EShop.Controllers.Client
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+        [HttpPost]
+        public IActionResult GetCode()
+        {
+            return Json(new APIDto((int)Code.stateCode.success, "", "", new
+            {
+                goodStateCode = Code.goodStateCode.selfDatas,
+                memberStateCode = Code.memberStateCode.selfDatas,
+                orderStateCode = Code.orderStateCode.selfDatas,
+                paymentTypeCode = Code.paymentTypeCode.selfDatas,
+                deliveryTypeCode = Code.deliveryTypeCode.selfDatas,
+            }));
         }
     }
 }

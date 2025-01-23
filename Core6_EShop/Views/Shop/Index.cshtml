@@ -1,137 +1,253 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-<div id="shopContainer">
+@model Core6_EShop.ViewModel.ShopViewModel
+<div id="shopContainer" v-cloak>
     <div class="row mb-3">
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">關鍵字：</label>
-                        <input type="text" class="form-control" placeholder="卯咪" v-model="mainData.shopDtoData.searchKey">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">排序方式：</label>
+                            <select class="form-select" v-model="mainData.shopDtoData.sortType" v-on:change="sortBy()">
+                                <option v-for="item in sortListOption" :key="item.key" :value="item.key">
+                                    {{ item.value }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="customRange2" class="form-label">價格：</label>
-                        <input type="range" class="form-range" min="0" max="5" id="customRange2">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">關鍵字：</label>
+                            <input type="text" class="form-control" placeholder="請輸入" v-model="mainData.shopDtoData.searchKey">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="customRange2" class="form-label fw-bold">價格：</label>
+                        </div>
+                        <div class="col-md-5">
+                            <integer-only class="form-control" placeholder="最小值" v-model="mainData.shopDtoData.minPrice"></integer-only>
+                        </div>
+                        <div class="col-md-1 text-center p-1">
+                            –
+                        </div>
+                        <div class="col-md-5">
+                            <integer-only class="form-control" placeholder="最大值" v-model="mainData.shopDtoData.maxPrice"></integer-only>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary w-100" v-on:click="search()">
+                                <i class="bi bi-search me-1"></i>
+                                搜尋
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-9 mb-3">
             <div class="row mb-3">
-                <div class="col-md-12">
-                    <div class="btn-group">
-                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            排序
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">名稱</a></li>
-                            <li><a class="dropdown-item" href="#">發布日期</a></li>
-                        </ul>
+                <div class="col-auto">
+                    <div class="d-flex align-items-start">
+                        <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+                            <template v-for="(item, index) in goodsVMDatas">
+                                <button :class="item.navClass" v-bind:id="item.navId" v-bind:aria-selected="item.ariaSelected" v-bind:data-bs-target="item.dataBsTarget" v-bind:aria-controls="item.panelId" data-bs-toggle="pill" type="button" role="tab" style="width: 100px;">
+                                    {{item.varNameCH}}
+                                </button>
+                            </template>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <template v-for="(item, index) in goodsVMDatas">
-                    <div class="col-lg-3 col-md-4 col-sm-6">
-                        <div class="card mb-3">
-                            @* <img src="~/image/shop/sample.jpg" class="card-img-top" alt="..." /> *@
-                            <img v-bind:src="getImagePath(item.imagePath)" class="card-img-top" alt="..." /> 
-                            <div class="card-body">
-                                <h5 class="card-title">{{item.goodName}}</h5>
-                                <p class="card-text">{{item.goodDesc}}</p>
-                                <p class="card-text"><small class="text-muted">${{item.goodPrice}}</small></p>
-                                <button type="button" class="btn btn-primary w-100" v-on:click="more(item)">
-                                    <a class="nav-link p-0 text-white" asp-area="" asp-controller="Shop" asp-action="GoodsDetail" data-jwt="true">查看</a>
-                                </button>
+                <div class="col">
+                    <div class="tab-content">
+                        <template v-for="(item, index) in goodsVMDatas">
+                            <div :class="item.panelClass" v-bind:id="item.panelId" v-bind:aria-labelledby="item.panelId" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-12" v-if="item.dataIsEmpty">
+                                        <div class="alert alert-light text-center" role="alert">
+                                            <br />
+                                            哎呀 <i class="bi bi-emoji-surprise-fill"></i>
+                                            <br />
+                                            無資料可顯示
+                                        </div>
+                                    </div>
+                                    <template v-for="(item2, index2) in item.goodsDatas">
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="card mb-3">
+                                                <div class="imageHoverContainer">
+                                                    <img v-bind:src="getImagePath(item2.imagePath)" class="card-img-top imageHover" alt="..." loading="lazy" />
+                                                    <div class="justify-content-center w-100 buttonHover">
+                                                        <div class="col-md-12 text-center">
+                                                            <span class="badge rounded-pill bg-light text-dark btn p-2" v-on:click="more(item2)">
+                                                                <i class="bi bi-plus-lg h6 m-1"></i>
+                                                                <span class="h6 m-1">更多</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12 mb-1 fw-bold">
+                                                            <span class="link-secondary" role="button" v-on:click="more(item2)">{{item2.goodName}}</span>
+                                                            <span class="d-none">{{item2.gId}}</span>
+                                                        </div>
+                                                        <div class="col-md-12 mb-1">
+                                                            <template v-for="(item3, index3) in item2.goodsSizeDatas">
+                                                                <input type="radio" class="btn-check" v-bind:name="item3.sizeCheckBoxName" v-bind:id="item3.sizeCheckBoxId" v-bind:disabled="item3.isDisabled" :value="item3.sizeId" v-model="item2.sizeId">
+                                                                <label class="btn btn-outline-secondary btn-sm me-1 position-relative" v-bind:for="item3.sizeCheckBoxId">
+                                                                    {{item3.sizeName}}
+                                                                    <i class="bi bi-x-lg h4 w-100 position-absolute" v-if="item3.isDisabled" style="top:0;left:0;"></i>
+                                                                </label>
+                                                            </template>
+                                                        </div>
+                                                        <div class="col-md-12 mb-1 d-none">
+                                                            <small class="text-muted">{{item2.goodDesc_str}}</small>
+                                                        </div>
+                                                        <div class="col-md-8 mb-1 text-danger">
+                                                            <span class="align-middle">{{item2.goodPrice_str}}</span>
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <span class="badge rounded-pill bg-light text-dark btn p-2 eleHover" title="加入購物車" v-on:click="addToCart(item2)">
+                                                                <i class="bi bi-cart h6 m-1"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <div class="row mb-3">
+                            <div class="col-auto">
+                                <select class="form-select" v-model="mainData.shopDtoData.perPageNum">
+                                    <option v-for="option in mainData.shopDtoData.perPageNumList">
+                                        {{ option }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <nav aria-label="...">
+                                    <ul class="pagination justify-content-end">
+                                        <li class="page-item disabled">
+                                            <span class="page-link">上一頁</span>
+                                        </li>
+                                        <template v-for="item in mainData.shopDtoData.pageCountList">
+                                            <li :class="[item.active ? 'active' : '', 'page-item']" v-on:click="gotoPage(item)">
+                                                <a class="page-link" href="#">{{ item.pageNum }}</a>
+                                            </li>
+                                        </template>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">下一頁</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>
-                </template>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-auto">
-                    <select class="form-select" v-model="mainData.shopDtoData.perPageNum">
-                        <option v-for="option in mainData.shopDtoData.perPageNumList">
-                            {{ option }}
-                        </option>
-                    </select>
-                </div>
-                <div class="col">
-                    <nav aria-label="...">
-                        <ul class="pagination justify-content-end">
-                            <li class="page-item disabled">
-                                <span class="page-link">上一頁</span>
-                            </li>
-                            <template v-for="item in mainData.shopDtoData.pageCountList">
-                                <li :class="[item.active ? 'active' : '', 'page-item']" v-on:click="gotoPage(item)">
-                                    <a class="page-link" href="#">{{ item.pageNum }}</a>
-                                </li>
-                            </template>
-                            <li class="page-item">
-                                <a class="page-link" href="#">下一頁</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const { createApp, ref } = Vue;
-        async function loadData(_jsonParameter = '') {
-            var resultData = await $$ajaxPromise('/Shop/GetData', _jsonParameter);
-            console.log(resultData.payload);
-            const appMain = createApp({
-                data() {
-                    return {
-                        mainData: resultData.payload.shopViewModelData
-                    };
-                },
-                computed: {
-                    goodsVMDatas() {
-                        return this.mainData.goodsDatas;
+
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            class typeGoodsClass extends $$dynamicBase {
+                constructor(_object, allGoodsDatas = []) {
+                    super(_object);
+                    this.goodsDatas = allGoodsDatas.filter(x => x.gType1 == this.varValue).map(x => new goodsClass(x));
+                    this.dataIsEmpty = this.goodsDatas == null || this.goodsDatas.length == 0;
+                }
+            }
+            class goodsClass extends $$dynamicBase {
+                constructor(_object) {
+                    super(_object);
+                    this.goodsSizeDatas = this.goodsSizeDatas.map((x) => new goodsSizeClass(x));
+                    this.goodDesc_str = $$isNullorEmpty(this.goodDesc) ? '' : (this.goodDesc.substr(0, 10) + (this.goodDesc.length > 10 ? '...' : ''));
+                    this.goodPrice_str = 'NT$' + $$toCurrency(this.goodPrice);
+                }
+            }
+            class goodsSizeClass extends $$dynamicBase {
+                constructor(_object) {
+                    super(_object);
+                    this.sizeCheckBoxName = `size_${this.gId}`;
+                    this.sizeCheckBoxId = `size_${this.gId}_${this.sizeId}`;
+                    this.isDisabled = this.stockNum == 0;
+                    this.stockTitle = this.stockNum == 0 ? '缺貨中' : '';
+                }
+            }
+            const { createApp, ref } = Vue;
+            async function loadData(_modelData = {}) {
+                const appMain = createApp({
+                    components: vueComponent,
+                    data() {
+                        return {
+                            mainData: _modelData,
+                        };
                     },
-                    localImagePath() { 
-                    
-                    }
-                },
-                watch: {
-                    'mainData.shopDtoData.perPageNum': {
-                        async handler(newValue, oldValue) {
-                            var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
-                            this.mainData = resultData.payload.shopViewModelData;
+                    computed: {
+                        goodsVMDatas() {
+                            return this.mainData.gType1CodeDatas
+                                .map((x) => new typeGoodsClass(x, this.mainData.goodsDatas));
+                        },
+                        sortListOption() {
+                            return this.mainData.shopDtoData.sortList
+                                .map(x => new $$kv(x.key, x.value));
                         },
                     },
-                },
-                methods: {
-                    async gotoPage(itemObj) {
-                        this.mainData.shopDtoData.currentPageNum = itemObj.pageNum;
-                        var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
-                        this.mainData = resultData.payload.shopViewModelData;
+                    watch: {
+                        'mainData.shopDtoData.perPageNum': {
+                            async handler(newValue, oldValue) {
+                                await this.reloadData();
+                            },
+                        },
                     },
-                    async more(_item) {
-                        console.log(_item);
-                    },
-                    getImagePath(_path) { 
-                        return '/' + _path.replaceAll('\\', '/') + '/main.jpg';
-                    },
-                }
-            });
-            appMain.mount('#shopContainer');
-        }
-        await loadData();
-    });
-    // var viewModel = {
-    //     currentPageNum: 1,
-    //     perPageNum: 20,
-    //     sortType: 1,
-    //     searchKey: '',
-    //     minPrice: 1,
-    //     maxPrice: 10000,
-    //     goodDatas: [{ goodName: 'Foo' }, { goodName: 'Bar' }],
-    //     pageDatas: [{ pageNum: 1, active: true }, { pageNum: 2, active: false }],
-    // };
-</script>
+                    methods: {
+                        async reloadData() {
+                            console.log(this.mainData.shopDtoData);
+                            var resultData = await $$ajaxPromise('/Shop/GetShopData', this.mainData.shopDtoData);
+                            this.mainData = resultData.payload.shopViewModelData;
+                        },
+                        async gotoPage(itemObj) {
+                            this.mainData.shopDtoData.currentPageNum = itemObj.pageNum;
+                            await this.reloadData();
+                        },
+                        async more(_item) {
+                            _item.modalTitle = '商品內容';
+                            await $$openPanel('/Shop/LoadGoodsDetailModal', _item);
+                        },
+                        getImagePath(_path) {
+                            return '/' + _path.replaceAll('\\', '/') + '/thumbnail_m.png?version=' + new Date().getTime();
+                        },
+                        async search() {
+                            await this.reloadData();
+                        },
+                        async sortBy() {
+                            await this.reloadData();
+                        },
+                        async addToCart(_item) {
+                            if (_item.sizeId == 0) {
+                                this.more(_item);
+                                return;
+                            }
+                            var resultData = await $$ajaxPromise('/Cart/AddToCart', {
+                                gId: _item.gId,
+                                sizeId: _item.sizeId,
+                                quantity: 1
+                            });
+                            $$showToast(resultData);
+                        },
+                    }
+                });
+                appMain.mount('#shopContainer');
+            }
+            await loadData(@Json.Serialize(@Model));
+        });
+    </script>
+}

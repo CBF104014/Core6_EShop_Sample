@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>古斯</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/datatables/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Core6_EShop.styles.css" asp-append-version="true" />
     <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
@@ -22,44 +24,71 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house"></i>
+                                首頁
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="UserInfo">帳戶</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="UserInfo">
+                                <i class="bi bi-person-circle"></i>
+                                帳戶
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">商品</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">
+                                <i class="bi bi-box-seam"></i>
+                                商品
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Server" asp-action="GoodsManage">商品管理(Admin)</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Server" asp-action="CodeManage">代碼管理(Admin)</a>
-                        </li>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold text-danger" asp-area="" asp-controller="Server" asp-action="GoodsManage">
+                                    <i class="bi bi-gear"></i>
+                                    商品管理
+                                </a>
+                            </li>
+                            <li class="nav-item d-none">
+                                <a class="nav-link fw-bold text-danger" asp-area="" asp-controller="Server" asp-action="CodeManage">
+                                    <i class="bi bi-gear"></i>
+                                    代碼管理
+                                </a>
+                            </li>
+                        }
                     </ul>
                     <div class="navbar-brand">
                         <div class="dropdown">
                             <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <svg width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
-                                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z" />
-                                </svg>
-                                <span>{{userId}}</span>
-                                &nbsp;
+                                <i class="bi bi-person fs-5 mx-1"></i>
+                                <span class="mx-1" v-cloak>{{userId}}</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="accountDropdown">
-                                <li><a class="dropdown-item" v-if="!isLogin" asp-area="" asp-controller="Account" asp-action="Login">登入</a></li>
-                                <li><a class="dropdown-item" href="#" v-if="isLogin" v-on:click="logout">登出</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">註冊</a></li>
+                                <li>
+                                    <a class="dropdown-item" v-if="!isLogin" asp-area="" asp-controller="Account" asp-action="Login">
+                                        登入
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" v-if="isLogin" v-on:click="logout">
+                                        登出
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Register">
+                                        註冊
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
                     <div class="navbar-brand">
                         <div class="dropdown">
-                            <button class="btn btn-light dropdown-toggle" type="button" aria-expanded="false" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" v-on:click="getCart(item)">
-                                <svg width="20" height="20" fill="currentColor" class="bi bi-cart4" viewBox="0 0 16 16">
-                                    <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l.5 2H5V5H3.14zM6 5v2h2V5H6zm3 0v2h2V5H9zm3 0v2h1.36l.5-2H12zm1.11 3H12v2h.61l.5-2zM11 8H9v2h2V8zM8 8H6v2h2V8zM5 8H3.89l.5 2H5V8zm0 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" />
-                                </svg>
-                                &nbsp;
+                            <button class="btn btn-light dropdown-toggle position-relative" type="button" aria-expanded="false" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas" aria-controls="cartOffcanvas" v-on:click="getCart()">
+                                <i class="bi bi-cart4 fs-5 mx-1"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    +
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -67,38 +96,69 @@
             </div>
         </nav>
 
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        @* 購物車 *@
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel" style="width: 500px;">
             <div class="offcanvas-header">
-                <h5 id="offcanvasRightLabel">
+                <h5 id="cartOffcanvasLabel">
+                    <i class="bi bi-cart4 fs-5 mx-1"></i>
                     <strong>購物車清單</strong>
                 </h5>
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 <ul class="list-group mb-3">
-                    <template v-for="item in cartVMDatas">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="cart_selectAll" v-model="cartAllChecked" v-on:change="selectCartAll">
+                                    <label class="form-check-label" for="cart_selectAll">
+                                        全選
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <template v-for="(item, index) in cartDatas">
                         <li class="list-group-item">
                             <div class="row">
-                                <div class="col-4">
-                                    <img src="~/image/shop/100xSample.jpg" class="rounded" alt="...">
+                                <div class="col-6 mb-1">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" v-bind:id="item.selectCheckBoxId" v-model="item.isChecked" v-on:change="selectCartItem(index)">
+                                        <label class="form-check-label" v-bind:for="item.selectCheckBoxId"></label>
+                                    </div>
                                 </div>
-                                <div class="col-8">
+                                <div class="col-6 mb-1 text-end">
+                                    <i class="bi bi-trash3-fill btn p-0 eleHover" v-on:click="delCart(item)"></i>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-2">
+                                    <img v-bind:src="getImagePath(item.goodsData.imagePath)" class="w-100 h-100" alt="..." loading="lazy" />
+                                </div>
+                                <div class="col-md-7 mb-1">
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-md-11 mb-2">
                                             <h5 class="mb-0">
-                                                <strong>{{item.goodName}}</strong>
+                                                <strong class="link-secondary" role="button" v-on:click="more(item.goodsData)">{{item.goodsData.goodName}}</strong>
                                             </h5>
                                         </div>
-                                        <div class="col-md-12 lead">
-                                            <small>{{item.goodDesc}}</small>
+                                        <div class="col-md-12 mb-4">
+                                            <template v-for="(item2, index2) in item.goodsData.goodsSizeDatas">
+                                                <input type="radio" class="btn-check" v-bind:name="item2.sizeCheckBoxName" v-bind:id="item2.sizeCheckBoxId" v-bind:disabled="item2.isDisabled" :value="item2.sizeId" v-model="item.sizeId" v-on:change="changeSize(item)">
+                                                <label class="btn btn-outline-secondary btn-sm me-1 position-relative" v-bind:for="item2.sizeCheckBoxId">
+                                                    {{item2.sizeName}}
+                                                    <i class="bi bi-x-lg h4 w-100 position-absolute" v-if="item2.isDisabled" style="top:0;left:0;"></i>
+                                                </label>
+                                            </template>
                                         </div>
-                                        <div class="col-md-5 text-danger">
-                                            <strong>${{item.goodPrice_str}}</strong>
+                                        <div class="col-md-6 mb-1 text-danger">
+                                            <strong class="h4">${{item.goodPrice_str}}</strong>
                                         </div>
-                                        <div class="col-md-7">
+                                        <div class="col-md-6 mb-1">
                                             <div class="input-group">
                                                 <button class="btn btn-sm btn-outline-secondary" type="button" v-on:click="cartItemQuantityAdd(item, -1)">-</button>
-                                                <input type="tel" class="form-control" v-model="item.quantity">
+                                                <integer-only class="form-control form-control-sm" v-model="item.quantity" v-on:change="cartItemQuantityAdd(item, 0, $event)"></integer-only>
                                                 <button class="btn btn-sm btn-outline-secondary" type="button" v-on:click="cartItemQuantityAdd(item, 1)">+</button>
                                             </div>
                                         </div>
@@ -109,10 +169,10 @@
                     </template>
                 </ul>
                 <div class="row mb-3 justify-content-end">
-                    <div class="col-md-auto p-0">
+                    <div class="col-auto p-0 text-end">
                         <small>小計</small>
                     </div>
-                    <div class="col-md-auto">
+                    <div class="col-auto text-end">
                         <h4>
                             <strong class="text-danger">
                                 ${{cartTotal}}
@@ -120,7 +180,10 @@
                         </h4>
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary w-100" v-on:click="checkout">結帳</button>
+                <a class="btn btn-primary w-100" role="button" asp-area="" asp-controller="Order" asp-action="Index">
+                    <i class="bi bi-bag-check me-1"></i>
+                    結帳
+                </a>
             </div>
         </div>
     </header>
@@ -132,19 +195,41 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - Core6_EShop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/vue/vue.global.js"></script>
     <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/lib/datatables/datatables.min.js"></script>
+    <script src="~/lib/moment/moment.js"></script>
     @* ---global common js--- *@
     <script src="~/js/share.js" asp-append-version="true"></script>
     <script src="~/js/model.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<div class="d-none" id="modal_Template">
+    <div class="modal fade myModal" id="modalMain" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" ria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold m-0">
+                        @* 動態標頭 *@
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @* 動態內容 *@
+                </div>
+                <div class="modal-footer">
+                    @* 動態內容 *@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <template id="logo_Template">
     <a class="navbar-brand text-dark" asp-area="" asp-controller="Home" asp-action="Index">
         <svg width="20" height="20" fill="currentColor" class="bi bi-bag-fill" viewBox="0 0 16 16">
@@ -155,33 +240,52 @@
 </template>
 <template id="loader_Template">
     <div class="d-flex justify-content-center align-items-center h-100 w-100" style="position:fixed;z-index:10000;background-color:#d0e0ee4d">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
+        <div class="spinner-border mb-3" role="status"></div>
+        <span class="mt-5" style="position:absolute;">Loading...</span>
     </div>
 </template>
 <script>
     (() => {
+        class cartClass extends $$dynamicBase {
+            constructor(_object) {
+                super(_object);
+                this.goodsData = new goodsClass(this.goodsData, this.rankey);
+                this.itemTotal = $$toNum(this.goodsData.goodPrice) * $$toNum(this.quantity);
+                this.goodPrice_str = $$toCurrency(this.goodsData.goodPrice);
+                this.selectCheckBoxId = `cart_select_${this.rankey}`;
+            }
+        }
+        class goodsClass extends $$dynamicBase {
+            constructor(_object, _cartRankey) {
+                super(_object);
+                this.goodsSizeDatas = this.goodsSizeDatas == null ? [] : this.goodsSizeDatas.map(x => new goodsSizeClass(x, _cartRankey));
+            }
+        }
+        class goodsSizeClass extends $$dynamicBase {
+            constructor(_object, _cartRankey) {
+                super(_object);
+                this.cartRankey = _cartRankey;
+                this.sizeCheckBoxName = `cart_size_${this.gId}_${this.cartRankey}`;
+                this.sizeCheckBoxId = `${this.sizeCheckBoxName}_${this.sizeId}`;
+                this.isDisabled = this.stockNum == 0;
+                this.stockTitle = this.stockNum == 0 ? '缺貨中' : '';
+            }
+        }
         const { createApp, ref } = Vue;
         const appMain = createApp({
+            components: vueComponent,
             data() {
                 return {
                     logoHtml: document.getElementById('logo_Template').innerHTML,
                     loderHtml: document.getElementById('loader_Template').innerHTML,
                     userId: $$isNullorEmpty($$getCookie('userName')) ? '' : $$getCookie('userName'),
                     cartDatas: [],
+                    cartAllChecked: false,
                 }
             },
             computed: {
                 isLogin() {
                     return !$$isNullorEmpty(this.userId);
-                },
-                cartVMDatas() {
-                    return this.cartDatas.map((x) => {
-                        x.itemTotal = $$toNum(x.goodPrice) * $$toNum(x.quantity);
-                        x.goodPrice_str = $$toCurrency(x.itemTotal);
-                        return x;
-                    });
                 },
                 cartTotal() {
                     return $$toCurrency(this.cartDatas.reduce((a, b) => a + $$toNum(b.itemTotal), 0));
@@ -189,22 +293,80 @@
             },
             methods: {
                 async getCart() {
-                    var resultData = await $$ajaxPromise('/Cart/GetCart', JSON.stringify("xx"));
-                    // console.log(resultData.payload.cartDatas);
-                    this.cartDatas = resultData.payload.cartDatas;
+                    var resultData = await $$ajaxPromise('/Cart/GetCart');
+                    if (resultData.payload.cartDatas == null) {
+                        this.cartDatas = [];
+                        return;
+                    }
+                    this.cartDatas = resultData.payload.cartDatas.map((x) => new cartClass(x));
+                },
+                async updCart(_cartData) {
+                    var resultData = await $$ajaxPromise('/Cart/UpdCart', _cartData);
+                    if (resultData.state == 1) {
+                        await this.getCart();
+                    }
+                },
+                async delCart(_cartData) {
+                    var msgResult = await $$showMsg({
+                        title: `確定刪除?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                    });
+                    if (msgResult.isConfirmed != true)
+                        return;
+                    var resultData = await $$ajaxPromise('/Cart/DelCart', _cartData);
+                    if (resultData.state == 1) {
+                        await this.getCart();
+                    }
+                },
+                async selectCartItem(_index) {
+                    var resultData = await $$ajaxPromise('/Cart/UpdCart', this.cartDatas[_index]);
+                    if (resultData.state == 1) {
+                        await this.getCart();
+                    }
+                },
+                async selectCartAll() {
+                    var resultData = await $$ajaxPromise('/Cart/UpdCartChecked', { isChecked: this.cartAllChecked }, 'GET');
+                    if (resultData.state == 1) {
+                        await this.getCart();
+                    }
                 },
                 logout() {
                     $$deleteCookie('jwtToken');
                     $$deleteCookie('userName');
-                    location.href = window.location.origin;
+                    setTimeout(() => {
+                        location.href = window.location.origin;
+                    }, 100);
                 },
-                cartItemQuantityAdd(_item, _addNum = 0) {
-                    if ($$toNum(_item.quantity) + $$toNum(_addNum) > 0)
-                        _item.quantity = $$toNum(_item.quantity) + $$toNum(_addNum);
+                async cartItemQuantityAdd(_item, _addNum = 0, _evant = null) {
+                    var oldQuantity = _item.quantity;
+                    var newQuantity = _evant == null ? $$toNum(_item.quantity) + $$toNum(_addNum) : $$toNum(_evant.target.value);
+                    var minQuantity = 0;
+                    var maxQuantity = 999;
+                    if (newQuantity > maxQuantity) {
+                        await $$showMsg({
+                            title: `訂購數量過多，請聯絡客服專員!`,
+                            icon: 'warning',
+                        });
+                        await this.getCart();
+                        return;
+                    }
+                    if (newQuantity == minQuantity) { 
+                        return;
+                    }
+                    _item.quantity = newQuantity;
+                    await this.updCart(_item);
                 },
-                checkout() { 
-                    console.log('checkout!');
-                }
+                async changeSize(_item) {
+                    await this.updCart(_item);
+                },
+                getImagePath(_path) {
+                    return '/' + _path.replaceAll('\\', '/') + '/thumbnail_m.png?version=' + new Date().getTime();
+                },
+                async more(_item) {
+                    _item.modalTitle = '商品資訊';
+                    $$openPanel('/Shop/LoadGoodsDetailModal', _item);
+                },
             },
             mounted() { }
         });

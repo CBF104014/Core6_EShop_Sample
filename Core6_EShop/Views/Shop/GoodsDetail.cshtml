@@ -1,45 +1,135 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-<div id="goodDetailContainer">
-    <div class="row mb-3">
-        <div class="col-md-auto">
-            <img src="~/image/shop/sample.jpg" class="img-fluid" alt="...">
-        </div>
-        <div class="col">
-            <h4>
-                <strong>{{mainData.goodName}}</strong>
-            </h4>
-            <h6>
-                {{mainData.goodDesc}}
-            </h6>
-            <h6>
-                ${{mainData.goodPrice}}
-            </h6>
+
+@model Core6_EShop.Dto.GoodsDetailDto
+<div id="goodDetailContainer" v-cloak>
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col-auto">
+                <img v-bind:src="getImagePath(mainData.goodsData.imagePath)" class="img-fluid" alt="..." />
+            </div>
+            <div class="col">
+                <div class="row justify-content-end">
+                    <div class="col-12 mb-2">
+                        <h3>
+                            <strong>{{mainData.goodsData.goodName}}</strong>
+                        </h3>
+                    </div>
+                    <div class="col-12 mb-1">
+                        <small class="text-muted">產品規格：</small>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <template v-for="(item2, index2) in mainData.goodsData.goodsSizeDatas">
+                            <input type="radio" class="btn-check" v-bind:name="item2.sizeCheckBoxName" v-bind:id="item2.sizeCheckBoxId" v-bind:disabled="item2.isDisabled" :value="item2.sizeId" v-model="mainData.cartData.sizeId">
+                            <label class="btn btn-outline-secondary me-1 position-relative" v-bind:for="item2.sizeCheckBoxId">
+                                {{item2.sizeName}}
+                                <i class="bi bi-x-lg h4 w-100 position-absolute" v-if="item2.isDisabled" style="top:0;left:0;"></i>
+                            </label>
+                        </template>
+                    </div>
+                    <div class="col-12 mb-1">
+                        <small class="text-muted">產品內容：</small>
+                    </div>
+                    <div class="col-12 mb-5">
+                        <h6 class="text-muted" style="white-space: pre-line;">
+                            {{mainData.goodsData.goodDesc}}
+                        </h6>
+                    </div>
+                    <div class="col-12 mb-2 mt-5 d-flex justify-content-end">
+                        <h4 class="text-danger fw-bold">
+                            ${{mainData.goodsData.goodPrice_str}}
+                        </h4>
+                    </div>
+                    <div class="col-auto mb-2 d-flex align-self-end">
+                        <small class="text-muted">庫存：{{goodsStock}}</small>
+                    </div>
+                    <div class="col-4 mb-2">
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" v-on:click="cartItemQuantityAdd(-1)">-</button>
+                            <integer-only class="form-control" name="quantity" v-model="mainData.cartData.quantity"></integer-only>
+                            <button class="btn btn-outline-secondary" type="button" v-on:click="cartItemQuantityAdd(1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary" v-bind:disabled="isAddDisabled" v-on:click="addToCart()">
+                            <i class="bi bi-cart h6 m-1"></i>
+                            加入購物車
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
+    $(document).ready(async function () {
+        class goodsClass extends $$dynamicBase {
+            constructor(_object, _cartRankey) {
+                super(_object);
+                this.goodPrice_str = $$toCurrency(this.goodPrice);
+                this.goodsSizeDatas = this.goodsSizeDatas == null ? [] : this.goodsSizeDatas.map(x => new goodsSizeClass(x, 0));
+            }
+        }
+        class goodsSizeClass extends $$dynamicBase {
+            constructor(_object, _cartRankey) {
+                super(_object);
+                this.cartRankey = _cartRankey;
+                this.sizeCheckBoxName = `goodDetail_size_${this.gId}_${this.cartRankey}`;
+                this.sizeCheckBoxId = `${this.sizeCheckBoxName}_${this.sizeId}`;
+                this.isDisabled = this.stockNum == 0;
+                this.stockTitle = this.stockNum == 0 ? '缺貨中' : '';
+            }
+        }
         const { createApp, ref } = Vue;
-        async function loadData(_jsonParameter = '') {
-            var resultData = await $$ajaxPromise('/Shop/GetGoodsData', _jsonParameter);
-            console.log(resultData.payload);
+        async function loadData(_modelData = {}) {
             const appMain = createApp({
+                components: vueComponent,
                 data() {
                     return {
-                        mainData: resultData.payload.goodsData
+                        mainData: {
+                            goodsData: new goodsClass(_modelData.goodsData),
+                            cartData: _modelData.cartData,
+                        },
                     };
                 },
                 computed: {
+                    goodsStock() { 
+                        var selectedGoods = this.mainData.goodsData.goodsSizeDatas
+                            .find(x => x.sizeId == this.mainData.cartData.sizeId);
+                        return selectedGoods == null ? 0 : selectedGoods.stockNum;
+                    },
+                    isAddDisabled() { 
+                        return this.goodsStock <= 0;
+                    },
                 },
-                watch: {
-                },
+                watch: {},
                 methods: {
+                    getImagePath(_path) {
+                        return '/' + _path.replaceAll('\\', '/') + '/main.png';
+                    },
+                    cartItemQuantityAdd(_addNum) {
+                        this.mainData.cartData.quantity = $$toNum(this.mainData.cartData.quantity) + _addNum;
+                    },
+                    async addToCart() {
+                        if (this.mainData.cartData.sizeId == 0) {
+                            $$showMsg({
+                                title: '請先選擇規格',
+                            });
+                            return;
+                        }
+                        var addResultData = await $$ajaxPromise('/Cart/AddToCart', this.mainData.cartData);
+                        $$showToast(addResultData);
+                        if (addResultData.state == 1) {
+                            $$closePanel();
+                        } else {
+                            $$showValidationResult(selfId, addResultData.payload.validateDatas);
+                        }
+                    },
                 }
             });
             appMain.mount('#goodDetailContainer');
         }
-        await loadData(JSON.stringify(1));
+        await loadData(@Json.Serialize(@Model));
     });
 </script>

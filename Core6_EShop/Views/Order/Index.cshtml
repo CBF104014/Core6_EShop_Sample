@@ -1,0 +1,195 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+ @* v-cloak *@
+<div id="orderContainer" class="row justify-content-center" v-cloak>
+    <div class="col-md-8 mt-2">
+        <div class="row mb-2">
+            <div class="col-md-12 mb-2">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col" style="width:50px;">-</th>
+                            <th scope="col">商品名稱</th>
+                            <th scope="col">規格</th>
+                            <th scope="col" class="text-end">數量</th>
+                            <th scope="col" class="text-end">單價</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in mainData.cartDatas">
+                            <td class="align-middle">{{ index + 1 }}</td>
+                            <td>
+                                <img v-bind:src="getImagePath(item.goodsData.imagePath)" alt="..." loading="lazy" style="width:50px;" />
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="text-decoration-none" v-on:click="getGoodsInfo(item.goodsData)">
+                                    {{item.goodsData.goodName}}
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <span class="w-100">
+                                    {{getSizeName(item)}}
+                                </span>
+                                <br />
+                                <small class="w-100">
+                                    庫存：{{getStockNum(item)}}
+                                </small>
+                            </td>
+                            <td class="text-end align-middle">
+                                <i class="bi bi-x me-1"></i>
+                                {{getQuantity(item)}}
+                            </td>
+                            <td class="text-end align-middle">
+                                {{getGoodPrice(item)}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-end text-danger" colspan="6">
+                                <strong>
+                                    小計：{{totalAmt}}
+                                </strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label">*寄送方式</label>
+                <select class="form-select" name="orderData.paymentType" v-model="mainData.orderData.deliveryType">
+                    <option v-for="option in mainData.deliveryTypeOption" :key="option.key" :value="option.key" :disabled="option.disable">
+                        {{ option.value }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label">*付款方式</label>
+                <select class="form-select" name="orderData.deliveryType" v-model="mainData.orderData.paymentType">
+                    <option v-for="option in mainData.paymentTypeOption" :key="option.key" :value="option.key" :disabled="option.disable">
+                        {{ option.value }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-12 mb-2">
+                <label class="form-label">訂單備註</label>
+                <textarea class="form-control" placeholder="備註" v-model="mainData.orderData.orderDesc"></textarea>
+            </div>
+            <div class="col-md-12 mb-2">
+                <label class="form-label"></label>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-6">
+                <small>總額</small>
+                <div class="col-auto">
+                    <h4>
+                        <strong class="text-danger">
+                            {{totalAmt}}
+                        </strong>
+                    </h4>
+                </div>
+            </div>
+            <div class="col-6 text-end">
+                <br />
+                <button type="button" class="btn btn-primary" v-on:click="saveData">
+                    <i class="bi bi-currency-dollar me-1"></i>
+                    送出訂單
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'orderContainer';
+            async function loadData(_parameter) {
+                var resultData = await $$ajaxPromise('/Order/GetPreOrderData', _parameter);
+                var gType1Option = resultData.payload.gType1CodeDatas
+                    .map(x => new $$kv(x.varValue, x.varNameCH));
+                gType1Option.unshift(new $$kv(0, '請選擇'));
+                // console.log(resultData.payload);
+                return {
+                    cartDatas: resultData.payload.cartDatas,
+                    orderData: resultData.payload.orderData,
+                    gType1Option: gType1Option,
+                    paymentTypeOption: [new $$kv(0, '請選擇'), new $$kv(1, '貨到付款'), new $$kv(2, '信用卡/金融卡')],
+                    deliveryTypeOption: [new $$kv(0, '請選擇'), new $$kv(1, '宅配'), new $$kv(2, '7-11'), new $$kv(3, '全家')],
+                };
+            };
+            async function initApp(_modelData) {
+                if (_modelData == null)
+                    _modelData = await loadData();
+                const appMain = createApp({
+                    components: vueComponent,
+                    data() {
+                        return {
+                            mainData: _modelData,
+                        };
+                    },
+                    computed: {
+                        totalAmt() {
+                            var sum = 0;
+                            this.mainData.cartDatas.forEach((item) => {
+                                sum += $$toNum(item.quantity) * $$toNum(item.goodsData.goodPrice);
+                            });
+                            return '$ ' + $$toCurrency(sum);
+                        },
+                    },
+                    watch: {},
+                    methods: {
+                        saveData: async function () {
+                            var msgResult = await $$showMsg({
+                                title: `確定送出訂單?`,
+                                icon: 'question',
+                                showCancelButton: true,
+                            });
+                            if (msgResult.isConfirmed != true)
+                                return;
+                            var resultData = await $$ajaxPromise('/Order/SaveOrderData', {
+                                cartDatas: this.mainData.cartDatas,
+                                orderData: this.mainData.orderData,
+                            });
+                            console.log(resultData);
+                            if (resultData.state == 1) {
+                                await $$showMsg(resultData);
+                                location.href = window.location.origin + '/Home/Index';
+                            } else {
+                                $$showMsg(resultData);
+                                $$showValidationResult(selfId, resultData.payload.validateDatas);
+                            }
+                        },
+                        getImagePath(_path) {
+                            return '/' + _path.replaceAll('\\', '/') + '/thumbnail_m.png?version=' + new Date().getTime();
+                        },
+                        getSizeName(_cartItem) {
+                            var findSize = _cartItem.goodsData.goodsSizeDatas
+                                .find(x => x.sizeId == _cartItem.sizeId);
+                            return findSize == null ? '-' : findSize.sizeName;
+                        },
+                        getStockNum(_cartItem) {
+                            var findSize = _cartItem.goodsData.goodsSizeDatas
+                                .find(x => x.sizeId == _cartItem.sizeId);
+                            return findSize == null ? '-' : $$toCurrency(findSize.stockNum);
+                        },
+                        getGoodPrice(_cartItem) {
+                            return '$ ' + $$toCurrency(_cartItem.goodsData.goodPrice);
+                        },
+                        getQuantity(_cartItem) {
+                            return $$toCurrency(_cartItem.quantity);
+                        },
+                        getGoodsInfo: async function (_item) {
+                            _item.modalTitle = '商品內容';
+                            await $$openPanel('/Shop/LoadGoodsDetailModal', _item);
+                        },
+                    }
+                });
+                appMain.mount('#' + selfId);
+            }
+            await initApp();
+        });
+    </script>
+}

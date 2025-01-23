@@ -1,13 +1,19 @@
-﻿namespace Core6_EShop.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Core6_EShop.Models
 {
     public class Goods
     {
-        public long Rankey { get; set; }
-        public string GType1 { get; set; }
-        public string GType2 { get; set; }
-        public int GId { get; set; }
-        public string GoodName { get; set; }
-        public decimal GoodPrice { get; set; }
-        public string GoodDesc { get; set; }
+        public long rankey { get; set; }
+        public int gId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "欄位必填")]
+        public int gType1 { get; set; }
+        [Required(ErrorMessage = "欄位必填")]
+        public string goodName { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "數值須大於0")]
+        public decimal goodPrice { get; set; }
+        [Required(ErrorMessage = "欄位必填")]
+        public string goodDesc { get; set; }
+        public int goodState { get; set; }
     }
 }

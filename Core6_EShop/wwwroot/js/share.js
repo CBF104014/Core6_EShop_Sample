@@ -1,7 +1,107 @@
 ﻿//=======
 //共用js
 //=======
-
+//Vue擴充
+const vueComponent =
+{
+    //只允許輸入整數
+    'integer-only': Vue.defineComponent({
+        props: {
+            modelValue: {
+                type: Number,
+                required: true
+            }
+        },
+        data() {
+            return {
+                isInputActive: false
+            }
+        },
+        methods: {
+            inputOnFocus: (_event) => {
+                _event.target.select();
+                this.isInputActive = true;
+            },
+        },
+        computed: {
+            displayValue: {
+                get() {
+                    if (this.isInputActive) {
+                        return this.modelValue.toString();
+                    } else {
+                        return $$toCurrency(this.modelValue);
+                    }
+                },
+                set(_modifiedValue) {
+                    let newValue = parseFloat(_modifiedValue.replace(/[^0-9]/g, ''));
+                    if (isNaN(newValue)) {
+                        newValue = 0
+                    }
+                    this.$emit('update:modelValue', newValue);
+                }
+            }
+        },
+        template: `<input type="tel" class="form-control" v-model="displayValue" @@blur="isInputActive=false" @@focus="this.isInputActive = true">`
+    }),
+};
+//開啟視窗
+async function $$openPanel(_partialViewPath, _viewParameter = {}) {
+    return new Promise((resolve, reject) => {
+        var cloneModalElement = document
+            .getElementById('modal_Template').firstElementChild
+            .cloneNode(true);
+        $(cloneModalElement).css('background-color', '#4f4e4e82');
+        if (_viewParameter == null) {
+            _viewParameter = {};
+        }
+        //Id
+        cloneModalElement.id = 'Modal_' + new Date().getTime();
+        _viewParameter.modalId = cloneModalElement.id;
+        //視窗大小(modalSize)
+        if (_viewParameter.modalSize != null) {
+            var modalSize = 'modal-xl';
+            if (_viewParameter.modalSize == 'lg')
+                modalSize = 'modal-lg';
+            else if (_viewParameter.modalSize == 'sm')
+                modalSize = 'modal-sm';
+            $(cloneModalElement)
+                .find('.modal-dialog')
+                .removeClass('modal-xl');
+            $(cloneModalElement)
+                .find('.modal-dialog')
+                .addClass(modalSize);
+        }
+        var myModal = new bootstrap
+            .Modal(cloneModalElement, {});
+        cloneModalElement
+            .addEventListener('hidden.bs.modal', function (event) {
+                cloneModalElement.remove();
+                resolve();
+            });
+        myModal.show();
+        //標頭(modalTitle)
+        if (_viewParameter.modalTitle != null) {
+            $(cloneModalElement)
+                .find('.modal-title')
+                .text(_viewParameter.modalTitle);
+        } else {
+            $(cloneModalElement)
+                .find('.modal-title')
+                .text('');
+        }
+        //內容
+        $(cloneModalElement)
+            .find('.modal-body')
+            .load(_partialViewPath, _viewParameter, () => { });
+    });
+}
+//關閉視窗
+function $$closePanel() {
+    var modalDatas = $('.modal .btn-close');
+    var len = modalDatas.length;
+    if (len > 1)
+        modalDatas[len - 1].click();
+}
 //開啟訊息視窗
 function $$showMsg(_parameter = {}) {
     if (_parameter == null)
@@ -9,12 +109,57 @@ function $$showMsg(_parameter = {}) {
     _parameter.title = _parameter.title == null ? '' : _parameter.title;
     _parameter.text = _parameter.message == null ? '' : _parameter.message;
     _parameter.icon = _parameter.icon == null ? 'info' : _parameter.icon;
+    _parameter.timer = _parameter.timer == null ? 5000 : _parameter.timer;
+    _parameter.timerProgressBar = true;
     _parameter.allowOutsideClick = _parameter.allowOutsideClick == null ? false : _parameter.allowOutsideClick;
     _parameter.showCloseButton = _parameter.showCloseButton == null ? true : _parameter.showCloseButton;
     _parameter.showCancelButton = _parameter.showCancelButton == null ? false : _parameter.showCancelButton;
     _parameter.confirmButtonText = _parameter.confirmButtonText == null ? '確定' : _parameter.confirmButtonText;
     _parameter.cancelButtonText = _parameter.cancelButtonText == null ? '取消' : _parameter.cancelButtonText;
     return Swal.fire(_parameter);
+}
+//開啟訊息視窗
+function $$showToast(_parameter = {}) {
+    _parameter.title = _parameter.title == null ? '' : _parameter.title;
+    _parameter.icon = _parameter.icon == null ? 'success' : _parameter.icon;
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "bottom-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    return Toast.fire(_parameter);
+}
+//顯示資料驗證結果
+function $$showValidationResult(_containerId = '', _validateDatas = []) {
+    if (_containerId == null)
+        return;
+    if (_validateDatas == null || _validateDatas.length == 0)
+        return;
+    $('#' + _containerId +' .myValidation').remove();
+    for (var i = 0; i < _validateDatas.length; i++) {
+        var errors = "";
+        if (_validateDatas[i].errorDatas != null && _validateDatas[i].errorDatas.length > 0) {
+            errors = _validateDatas[i].errorDatas
+                .join('\r\n');
+        }
+        $('#' + _containerId)
+            .find('[name="' + _validateDatas[i].fieldFullName + '"]')
+            .after(`<div class="myValidation invalid-feedback m-0"><i class="bi bi-exclamation-circle"></i> ${errors}</div>`);
+    }
+    if ($(".myValidation").length > 0) {
+        $('#' + _containerId).parent().animate({
+            scrollTop: 0
+        }, 0);
+        $('#' + _containerId).parent().animate({
+            scrollTop: $(".myValidation").offset().top - 100
+        }, 1500);
+    }
 }
 //載入動畫
 function $$loder(_start = true) {
@@ -27,26 +172,25 @@ function $$isNullorEmpty(_val) {
     return _val === null || _val === undefined || _val === ''; 
 }
 //ajax使用promise
-function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
+function $$ajaxPromise(_url = '', _parameter = {} , _ajaxType = 'POST', loaderAni = true) {
     //若須驗證需在後端加上[Authorize]屬性
     return new Promise((_resolve, _reject) => {
         if (loaderAni == true)
             $$loder(true);
-        const jwtToken = $$getCookie('jwtToken');
+        //const jwtToken = $$getCookie('jwtToken');
         $.ajax({
-            type: "POST",
+            type: _ajaxType,
             url: _url,
-            headers: {
-                'Authorization': 'Bearer ' + jwtToken
-            },
-            data: _josnParameter,
+            data: _ajaxType.toLowerCase() == 'post' ? JSON.stringify(_parameter) : _parameter,
             contentType: "application/json",
             success: function (rs) {
+                if (loaderAni == true)
+                    $$loder(false);
                 _resolve(rs);
-                $$loder(false);
             },
             error: function (rs) {
-                $$loder(false);
+                if (loaderAni == true)
+                    $$loder(false);
                 _reject(rs);
                 if (rs.status == 401) {
                     //未授權(未登入)
@@ -66,6 +210,36 @@ function $$ajaxPromise(_url = '', _josnParameter = '', loaderAni = true) {
                 }
             }
         });
+    });
+}
+function $$getNow() {
+    const date = new Date();
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    const fff = String(date.getMilliseconds()).padStart(3, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss} ${fff}`;
+}
+function $$exePromise(_promiseArr = []) {
+    if (_promiseArr == null || _promiseArr.length == 0)
+        return;
+    console.log($$getNow());
+    $$loder(true);
+    return new Promise((_resolve, _reject) => {
+        Promise.all(_promiseArr).then(
+            (values) => {
+                console.log($$getNow());
+                _resolve(values);
+                $$loder(false);
+            },
+            (reason) => {
+                _resolve(reason);
+                $$loder(false);
+            },
+        );
     });
 }
 //數字千分位
@@ -96,6 +270,9 @@ function $$safeRound(v, n) {
 function $$toNum(_num, _decimalPlace = 2) {
     if ($$isNullorEmpty(_num))
         return 0;
+    if (String(_num).indexOf(',') > -1) {
+        _num = _num.replaceAll(',', '');
+    }
     return $$safeRound(_num, _decimalPlace);
 }
 //設置cookie
@@ -115,9 +292,8 @@ function $$getCookie(_name) {
     return null;
 }
 function $$deleteCookie(_name) {
-    document.cookie = _name + '=; Max-Age=-99999999;';
+    $$setCookie(_name, '', -1);
 }
-
 //附件預覽
 function $$previewFile(name, type, obj) {
     type = String(type).toLowerCase();
@@ -166,4 +342,12 @@ function $$previewFile(name, type, obj) {
             $$saveByteArray(name, type, base64Arr);
             break;
     }
+}
+//複製資料
+function $$clone(_obj = {}) {
+    if (_obj === null)
+        return null;
+    else if (_obj === undefined)
+        return undefined;
+    return JSON.parse(JSON.stringify(_obj));
 }

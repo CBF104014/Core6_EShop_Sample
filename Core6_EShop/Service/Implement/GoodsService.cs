@@ -1,65 +1,89 @@
 ﻿using Core6_EShop.Cls;
 using Core6_EShop.Dto;
 using Core6_EShop.Models;
+using Core6_EShop.Repository.Implement;
 using Core6_EShop.Service.Base;
 using Core6_EShop.ViewModel;
+using System.Data;
 
 namespace Core6_EShop.Service.Implement
 {
     public class GoodsService : BaseService<Goods>
     {
-        public Goods SelByPK(string gType1, string gType2, int gId)
+        private GoodsRepository goodsRepository { get; set; }
+        public GoodsService(GoodsRepository goodsRepository) : base(goodsRepository)
         {
-            return _mySqlTool.Read("GType1=@GType1 and GType2=@GType2 and GId=@GId", new Dictionary<string, object>()
-            {
-                ["GType1"] = gType1,
-                ["GType2"] = gType2,
-                ["GId"] = gId,
-            }).FirstOrDefault();
+            this.goodsRepository = goodsRepository;
         }
-        public int Add(Goods goodsData)
+        public DataTablesResultDto GetGoodsGrid(DataTablesDto dataTablesDto)
         {
-            return _mySqlTool.Create(goodsData);
+            return goodsRepository.GetGoodsGrid(dataTablesDto);
+        }
+        /// <summary>
+        /// 取得新的商品編號
+        /// </summary>
+        public async Task<int> GetNewGId()
+        {
+            return await goodsRepository.GetNewGId();
+        }
+        /// <summary>
+        /// 篩選後商品資料
+        /// </summary>
+        public async Task<ShopViewModel> SelByFilter(ShopDto shopDtoData = null, IDbConnection conn = null, IDbTransaction tran = null)
+        {
+            return await goodsRepository.SelByFilter(shopDtoData, conn: conn, tran: tran);
+        }
+        /// <summary>
+        /// 查詢單一商品
+        /// </summary>
+        public async Task<GoodsFileViewModel> SelByGId(int gId, IWebHostEnvironment env)
+        {
+            return await goodsRepository.SelByGId(gId, env);
         }
         /// <summary>
         /// 取預設值
         /// </summary>
         public ShopDto GetDefaultShopData()
         {
-            return new Dto.ShopDto()
-            {
-                currentPageNum = 1,
-                sortType = 0,
-                perPageNum = 20,
-            }.Init();
+            return goodsRepository.GetDefaultShopData();
         }
         /// <summary>
-        /// 篩選後商品資料
+        /// 取商品範本
         /// </summary>
-        public ShopViewModel SelByFilter(ShopDto shopDtoData)
+        public GoodsFileViewModel GetSampleData()
         {
-            if (shopDtoData == null)
-                shopDtoData = GetDefaultShopData();
-            var goodsDatas = SelAll<GoodsViewModel>((shopDtoData.currentPageNum - 1) * shopDtoData.perPageNum, shopDtoData.perPageNum);
-            var allGoodsCount = GetCount();
-            shopDtoData.pageCount = Convert.ToInt32(Math.Ceiling((decimal)allGoodsCount / shopDtoData.perPageNum));
-            if (shopDtoData.currentPageNum > shopDtoData.pageCount)
-                shopDtoData.currentPageNum = shopDtoData.pageCount;
-            return new ShopViewModel()
-            {
-                ShopDtoData = shopDtoData,
-                GoodsDatas = goodsDatas,
-            };
+            return goodsRepository.GetSampleData();
         }
         /// <summary>
-        /// 寫入商品
+        /// 商品存檔
         /// </summary>
-        public void CreateGoods(IWebHostEnvironment _webHostEnvironment, GoodsViewModel goodsData)
+        public async Task<int> SaveGoods(IWebHostEnvironment _env, GoodsFileViewModel goodsData, IDbConnection conn = null, IDbTransaction tran = null)
         {
-            goodsData.basePath = _webHostEnvironment.WebRootPath;
-            Directory.CreateDirectory(goodsData.fullPathWithoutImage);
-            File.WriteAllBytes(goodsData.fullPath, goodsData.fileData.byteData);
-            Add(goodsData.Mapping<Goods>());
+            if (goodsData.rankey > 0)
+                return await goodsRepository.UpdGoods(_env, goodsData, conn: conn, tran: tran);
+            else
+                return await goodsRepository.AddGoods(_env, goodsData, conn: conn, tran: tran);
+        }
+        /// <summary>
+        /// 寫入商品與圖片
+        /// </summary>
+        public async Task<int> AddGoods(IWebHostEnvironment _env, GoodsFileViewModel goodsData, IDbConnection conn = null, IDbTransaction tran = null)
+        {
+            return await goodsRepository.AddGoods(_env, goodsData, conn: conn, tran: tran);
+        }
+        /// <summary>
+        /// 刪除商品與圖片
+        /// </summary>
+        public async Task<int> DelByGId(IWebHostEnvironment _env, int gId, IDbConnection conn = null, IDbTransaction tran = null)
+        {
+            return await goodsRepository.DelByGId(_env, gId, conn: conn, tran: tran);
+        }
+        /// <summary>
+        /// 更新商品與圖片
+        /// </summary>
+        public async Task<int> UpdGoods(IWebHostEnvironment _env, GoodsFileViewModel goodsData, IDbConnection conn = null, IDbTransaction tran = null)
+        {
+            return await goodsRepository.UpdGoods(_env, goodsData, conn: conn, tran: tran);
         }
     }
 }

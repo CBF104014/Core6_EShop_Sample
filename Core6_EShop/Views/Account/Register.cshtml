@@ -1,5 +1,177 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-@{
+<div id="registerContainer" v-cloak>
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-8">
+            <div class="card-header text-center">
+                <h5 class="fw-bold">會員註冊</h5>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label">*姓名：</label>
+                                <input type="text" class="form-control" name="name" placeholder="John" v-model="mainData.memberData.name">
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="mb-3">
+                                <label class="form-label">*電子郵件：</label>
+                                <input type="email" class="form-control" name="email" placeholder="xxx@mail.com" v-model="mainData.memberData.email">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label">國家：</label>
+                                <select class="form-select" name="countryCode" v-model="mainData.memberData.countryCode">
+                                    <option v-for="item in mainData.countryOption" :key="item.key" :value="item.key" :disabled="item.disable">
+                                        {{ item.value }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="mb-3">
+                                <label class="form-label">城市：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.memberData.city">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label">*手機號碼：</label>
+                                <input type="tel" class="form-control" name="phone" placeholder="0912345678" v-model="mainData.memberData.phone">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">郵遞區號：</label>
+                                <input type="text" class="form-control" placeholder="" v-model="mainData.memberData.zipCode">
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="mb-3">
+                                <label class="form-label">*地址：</label>
+                                <input type="text" class="form-control" name="address" placeholder="" v-model="mainData.memberData.address">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="form-label">會員協議：</label>
+                        <div class="col-md-12 mb-3">
+                            <div class="overflow-auto border p-3" style="height: 300px;">
+                                <p>尊敬的用戶，歡迎您加入我們的會員服務！在註冊成為我們的會員之前，請您仔細閱讀以下會員協議（以下簡稱「協議」）。您註冊或使用本服務，即表示您同意接受本協議的所有條款。</p>
+                                <h5>一、會員資格</h5>
+                                <p>1. 會員資格僅限於具備完全民事行為能力的個人，且符合本平台會員條件的用戶。</p>
+                                <p>2. 會員註冊時，需提供真實、準確、完整的個人資訊，並保持資訊的及時更新。</p>
+                                <h5>二、帳戶安全</h5>
+                                <p>1. 會員需妥善保管帳戶資訊，包括使用者名稱、密碼等。</p>
+                                <p>2. 會員應當對其帳戶下的所有活動負責，包括但不限於任何未經授權的使用。</p>
+                                <p>3. 若發現任何安全漏洞或帳戶異常，會員應立即通知平台客服。</p>
+                                <h5>三、服務內容</h5>
+                                <p>1. 作為會員，您將享有平台提供的專屬服務，包括但不限於優惠、積分、會員專享內容等。</p>
+                                <p>2. 平台有權根據運營需要，調整、修改或增加服務內容。</p>
+                                <h5>四、使用限制</h5>
+                                <p>1. 會員不得利用平台服務從事任何非法或違背社會公共道德的行為。</p>
+                                <p>2. 會員不得擅自將平台服務轉讓或再授權給第三方。</p>
+                                <h5>五、費用及支付</h5>
+                                <p>1. 平台可能會向會員收取服務費用，會員應按平台規定的方式支付。</p>
+                                <p>2. 所有費用和支付條款將由平台根據具體服務內容進行調整，會員應及時關注相關費用更新。</p>
+                                <h5>六、隱私保護</h5>
+                                <p>1. 平台承諾嚴格保護會員的個人隱私資訊。</p>
+                                <p>2. 除非法律要求或會員同意，平台不會向任何第三方披露會員的個人資訊。</p>
+                                <h5>七、協議的修改和終止</h5>
+                                <p>1. 平台有權在任何時候修改本協議，修改後的協議將在平台公告或通過其他方式通知會員。</p>
+                                <p>2. 會員如不同意修改後的協議，可以選擇終止會員資格。</p>
+                                <p>3. 平台有權根據實際情況，在任何時候終止會員資格，特別是當會員違反本協議條款時。</p>
+                                <h5>八、免責聲明</h5>
+                                <p>1. 平台在提供服務過程中，如發生不可抗力或其他非平台控制的原因導致服務中斷，平台不承擔責任。</p>
+                                <p>2. 對於因會員自身原因造成的損失，平台不承擔任何責任。</p>
+                                <p>3. 平台為「測試用」，平台不承擔任何責任。</p>
+                                <h5>九、其他</h5>
+                                <p>1. 本協議自會員註冊並確認同意之日起生效。</p>
+                                <p>2. 本協議包含平台與會員之間的完整協議，並取代之前的所有口頭或書面協議。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="agree" v-model="mainData.isAgree" />
+                                <label class="form-check-label" for="agree">
+                                    我已詳細閱讀，並同意會員協議
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary m-1" v-on:click="saveData">
+                                <i class="bi bi-check-lg"></i>
+                                確認註冊
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'registerContainer';
+            async function loadData(_parameter) {
+                var resultData = await $$ajaxPromise('/Account/GetRegisterData', _parameter);
+                var countryOption = resultData.payload.countryDatas
+                    .map(x => new $$kv(x.countryCode, `${x.countryENName},${x.countryCHName}`, x.countryState != 1));
+                countryOption.unshift(new $$kv('', '請選擇'));
+                return {
+                    memberData: resultData.payload.memberData,
+                    countryOption: countryOption,
+                    isAgree: false,
+                };
+            };
+            async function initApp(_modelData) {
+                if (_modelData == null)
+                    _modelData = await loadData();
+                const appMain = createApp({
+                    components: vueComponent,
+                    data() {
+                        return {
+                            mainData: _modelData,
+                        };
+                    },
+                    computed: {},
+                    watch: {},
+                    methods: {
+                        saveData: async function () {
+                            if (this.mainData.isAgree != true) {
+                                $$showMsg({ title: '請閱讀會員協議，並勾選同意' });
+                                return;
+                            }
+                            var resultData = await $$ajaxPromise('/Account/SaveRegisterData', this.mainData.memberData);
+                            if (resultData.state == 1) {
+                                await $$showMsg(resultData);
+                                location.href = window.location.origin + '/Account/Login';
+                            } else {
+                                $$showMsg(resultData);
+                                $$showValidationResult(selfId, resultData.payload.validateDatas);
+                            }
+                        },
+                    }
+                });
+                appMain.mount('#' + selfId);
+            }
+            await initApp();
+        });
+    </script>
 }

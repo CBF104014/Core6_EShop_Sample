@@ -1,137 +1,115 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-<link href="~/lib/cropper/cropper.min.css" rel="stylesheet" />
-<script src="~/lib/cropper/cropper.min.js"></script>
-<div id="goodsManageContainer">
 
-    <div class="accordion" id="accordionPanelsStayOpenExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                    <strong>附 件 上 傳</strong>
-                </button>
-            </h2>
-            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
-                <div class="accordion-body">
-                    <div class="row mb-3">
-                        <div class="col-md-10">
-                            <div class="card">
-                                <div class="border">
-                                    <img id="image" :src="imageSrc" style="width:100%;max-height:300px;" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label">商品編號：</label>
-                                <input type="tel" class="form-control" v-model="mainData.goodsData.gId">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label">分類1：</label>
-                                <input type="text" class="form-control" v-model="mainData.goodsData.gType1">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label">分類2：</label>
-                                <input type="text" class="form-control" v-model="mainData.goodsData.gType2">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label">檔名：</label>
-                                <input type="text" class="form-control" v-model="mainData.goodsData.fileData.fileName">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <input type="file" class="form-control" v-on:change="fileGetData">
-                            <button class="btn btn-secondary" type="button" v-on:click="filePreView">預覽檔案</button>
-                            <button class="btn btn-secondary" type="button" v-on:click="upload">上傳檔案</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div id="goodsManageContainer">
+    <div class="row">
+        <div class="col-md-12 mb-2">
+            <button type="button" class="btn btn-primary m-1" v-on:click="reloadTable">
+                <i class="bi bi-arrow-clockwise"></i>
+                重整
+            </button>
+            <button type="button" class="btn btn-primary m-1" v-on:click="addGoods">
+                <i class="bi bi-plus-lg"></i>
+                新增
+            </button>
+            <button type="button" class="btn btn-primary m-1" v-on:click="editGoods">
+                <i class="bi bi-pencil-square"></i>
+                編輯
+            </button>
+            <button type="button" class="btn btn-danger m-1" v-on:click="deleteGoods">
+                <i class="bi bi-trash3"></i>
+                刪除
+            </button>
         </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo">
-                    <strong>附 件 資 料</strong>
-                </button>
-            </h2>
-            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTwo">
-                <div class="accordion-body">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <button class="btn btn-secondary" type="button" v-on:click="()=>{}">取資料</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12" style="overflow:auto;">
+            <table id="goodsTable" class="table table-bordered table-hover" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const { createApp, ref } = Vue;
-        var cropper = new Cropper(document.getElementById('image'), {});
-        async function loadData(_jsonParameter = '') {
-            var resultData = await $$ajaxPromise('/Server/GetSampleData', _jsonParameter);
-            resultData.payload.goodsViewModelData.fileData = new $$fileBase();
-            // console.log(resultData.payload);
-            const appMain = createApp({
-                data() {
-                    return {
-                        mainData: {
-                            goodsData: resultData.payload.goodsViewModelData,
-                        }
-                    };
-                },
-                computed: {
-                    imageSrc: function () {
-                        if (this.mainData.goodsData.fileData.byteData == null)
-                            return '';
-                        return `data:image/${this.mainData.goodsData.fileData.fileType};base64,${this.mainData.goodsData.fileData.byteData}`;
-                    }
-                },
-                watch: {
-                },
-                methods: {
-                    fileGetData: async function (element) {
-                        var rs = await this.mainData.goodsData.fileData.GetFile(element);
-                        // console.log(this.mainData.goodsData.fileData.IsImage());
-                        console.log(rs);
-                        if (rs != true)
-                            return;
-                        cropper.destroy();
-                        cropper = new Cropper(document.getElementById('image'), {
-                            aspectRatio: 1,
-                            cropBoxResizable: false,
-                            crop(event) {
-                            },
-                        });
+
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'goodsManageContainer';
+            var dts = new $$dataTables('/Server/GetGoodsGrid', 'goodsTable');
+            async function loadData(_modelData = {}) {
+                const appMain = createApp({
+                    components: vueComponent,
+                    data() { return {}; },
+                    computed: {},
+                    watch: {},
+                    methods: {
+                        reloadTable: async function () {
+                            dts.reloadAll();
+                        },
+                        addGoods: async function () {
+                            await $$openPanel('/Server/LoadGoodsDetailManageModal', {
+                                modalTitle: '新增商品',
+                                gId: 0
+                            });
+                            dts.reloadAll();
+                        },
+                        editGoods: async function () {
+                            var selData = dts.getSelectedRowData();
+                            if (selData == null) {
+                                $$showMsg({ title: '請選擇任一筆資料' });
+                                return;
+                            }
+                            await $$openPanel('/Server/LoadGoodsDetailManageModal', {
+                                modalTitle: '編輯商品',
+                                gId: selData.gId,
+                            });
+                            dts.reloadAll();
+                        },
+                        deleteGoods: async function () {
+                            var selData = dts.getSelectedRowData();
+                            if (selData == null) {
+                                $$showMsg({ title: '請選擇任一筆資料' });
+                                return;
+                            }
+                            var msgResult = await $$showMsg({
+                                title: `確定刪除商品編號${selData.gId}?`,
+                                icon: 'question',
+                                showCancelButton: true,
+                            });
+                            if (msgResult.isConfirmed != true)
+                                return;
+                            var delResult = await $$ajaxPromise('/Server/DeleteGoods', { gId: selData.gId }, 'GET');
+                            if (delResult.state == 1) {
+                                dts.reloadAll();
+                            }
+                        },
+                        initDataTable: async function () {
+                            dts.tableRowId = 'gId';
+                            dts.onSelected = async (_selectDatas) => { };
+                            dts.tableColumns = [
+                                { data: 'gId', title: '商品編號', width: '15%', className: 'text-start' },
+                                {
+                                    data: 'imagePath', title: '商品圖片', width: '10%', className: 'text-center', render: (data, type, row) => {
+                                        var path = '/' + data.replaceAll('\\', '/') + '/thumbnail_s.png?t=' + new Date().getTime();
+                                        return `<img src="${path}" class="card-img-top" alt="..." loading="lazy" style="width:50px;" />`;
+                                    }
+                                },
+                                { data: 'gType1', title: '商品種類', width: '10%', className: 'text-start' },
+                                { data: 'goodName', title: '商品名稱', width: '50%', className: 'text-start' },
+                                { data: 'goodPrice', title: '商品價錢', width: '15%', className: 'text-end', render: (data, type, row) => { return '$' + $$toCurrency(data); } },
+                                { data: 'goodState', title: '狀態', width: '5%', className: 'text-end', render: (data, type, row) => { return data; } },
+                            ];
+                            await dts.loadTable();
+                        },
                     },
-                    filePreView: function (element) {
-                        this.mainData.goodsData.fileData.PreView();
-                    },
-                    upload: async function (str) {
-                        //TODO
-                        var imageBase64 = cropper
-                            .getCroppedCanvas()
-                            .toDataURL()
-                            .split("base64,")[1];
-                        this.mainData.goodsData.fileData.byteData = imageBase64;
-                        var resultData = await $$ajaxPromise('/Server/UploadImg', JSON.stringify(this.mainData.goodsData));
-                        $$showMsg(resultData);
+                    mounted() {
+                        this.initDataTable();
                     }
-                }
-            });
-            appMain.mount('#goodsManageContainer');
-        }
-        await loadData();
-    });
-</script>
+                });
+                appMain.mount('#' + selfId);
+            };
+            await loadData();
+        });
+    </script>
+}

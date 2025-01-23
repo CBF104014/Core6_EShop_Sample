@@ -11,12 +11,12 @@
                 <h5 class="card-header text-center">登入</h5>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="exampleFormControlInput1" class="form-label">電子郵件：</label>
-                        <input type="email" class="form-control" id="email" placeholder="xxxxx@example.com" v-model="email">
+                        <label class="form-label fw-bold">電子郵件：</label>
+                        <input type="email" class="form-control" placeholder="xxxxx@example.com" v-model="email">
                     </div>
                     <div class="mb-3">
-                        <label for="exampleFormControlInput1" class="form-label">密碼</label>
-                        <input type="password" class="form-control" id="password" v-model="password">
+                        <label class="form-label fw-bold">密碼</label>
+                        <input type="password" class="form-control" placeholder="測試用" v-model="password">
                     </div>
                     <div class="mb-3">
                         <button type="button" class="btn btn-primary w-100" v-on:click="checkUser">登入</button>
@@ -31,9 +31,13 @@
                 <div class="card-body">
                     <div class="font-inline">
                         <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="bi bi-lock-fill"></i>
+                            &nbsp;
                             <a href="#" class="card-link">忘記密碼?</a>
                         </h6>
                         <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="bi bi-pencil-fill"></i>
+                            &nbsp;
                             <a class="card-link" asp-area="" asp-controller="Account" asp-action="Register">註冊</a>
                         </h6>
                     </div>
@@ -42,32 +46,42 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const { createApp, ref } = Vue;
-        const appMain = createApp({
-            data() {
-                return {
-                    logoHtml: document.getElementById('logo_Template').innerHTML,
-                    email: 'xx',
-                    password: '',
-                }
-            },
-            methods: {
-                checkUser: async function (item) {
-                    var rs = await $$ajaxPromise('/Account/CheckUser', JSON.stringify({
-                        Id: this.email,
-                        Password: this.password,
-                    }));
-                    // console.log(rs);
-                    $$setCookie('jwtToken', rs.payload.token, 24);
-                    $$setCookie('userName', rs.payload.name, 24);
-                    $$showMsg(rs).then(() => {
-                        location.href = window.location.origin;
-                    });
-                }
-            }
+@section scripts {
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'loginContainer';
+            async function loadData(_modelData = {}) {
+                const appMain = createApp({
+                    data() {
+                        return {
+                            logoHtml: document.getElementById('logo_Template').innerHTML,
+                            email: 'goose@com.tw',
+                            password: '',
+                        }
+                    },
+                    methods: {
+                        checkUser: async function (item) {
+                            var rs = await $$ajaxPromise('/Account/CheckUser', {
+                                email: this.email,
+                                password: this.password,
+                            });
+                            if (rs.state != 1) {
+                                $$showMsg(rs);
+                                return;
+                            }
+                            // console.log(rs);
+                            $$setCookie('jwtToken', rs.payload.token, 1);
+                            $$setCookie('userName', rs.payload.name, 1);
+                            $$showMsg(rs).then(() => {
+                                location.href = window.location.origin;
+                            });
+                        }
+                    }
+                });
+                appMain.mount('#' + selfId);
+            };
+            await loadData();
         });
-        appMain.mount('#loginContainer');
-    });
-</script>
+    </script>
+}

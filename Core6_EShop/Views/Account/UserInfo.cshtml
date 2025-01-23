@@ -1,55 +1,142 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-<div id="userInfoContainer">
-    <div class="row justify-content-center mb-3">
-        <div class="col-md-6">
-            <div class="card-header text-center">
-                <h5>會員</h5>
+<div id="userInfoContainer" v-cloak>
+    <div class="row d-flex align-items-start">
+        <div class="nav flex-column nav-pills border p-0 col-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <button class="nav-link active" id="v-pills-member-tab" data-bs-toggle="pill" data-bs-target="#v-pills-member" type="button" role="tab" aria-controls="v-pills-member" aria-selected="true">
+                <i class="bi bi-person fs-5"></i>
+                <br />
+                會員資料
+            </button>
+            <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">
+                <i class="bi bi-cart4 fs-5"></i>
+                <br />
+                購買紀錄
+            </button>
+        </div>
+        <div class="tab-content col-10" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-member" role="tabpanel" aria-labelledby="v-pills-member-tab">
+                <div class="row justify-content-center mb-3">
+                    <div class="col-md-12">
+                        <div class="card-header text-center">
+                            <h5 class="fw-bold">會員資料</h5>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            <label class="form-label">*姓名：</label>
+                                            <input type="text" class="form-control" name="name" placeholder="" v-model="mainData.memberData.name" v-bind:disabled="!mainData.isEdit">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="mb-3">
+                                            <label class="form-label">*電子郵件：</label>
+                                            <input type="email" class="form-control" name="email" placeholder="" v-model="mainData.memberData.email" v-bind:disabled="!mainData.isEdit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            <label class="form-label">國家：</label>
+                                            <select class="form-select" name="countryCode" v-model="mainData.memberData.countryCode" v-bind:disabled="!mainData.isEdit">
+                                                <option v-for="item in mainData.countryOption" :key="item.key" :value="item.key" :disabled="item.disable">
+                                                    {{ item.value }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="mb-3">
+                                            <label class="form-label">城市：</label>
+                                            <input type="text" class="form-control" placeholder="" v-model="mainData.memberData.city" v-bind:disabled="!mainData.isEdit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            <label class="form-label">*手機號碼：</label>
+                                            <input type="tel" class="form-control" name="phone" placeholder="" v-model="mainData.memberData.phone" v-bind:disabled="!mainData.isEdit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">郵遞區號：</label>
+                                            <input type="text" class="form-control" placeholder="" v-model="mainData.memberData.zipCode" v-bind:disabled="!mainData.isEdit">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="mb-3">
+                                            <label class="form-label">*地址：</label>
+                                            <input type="text" class="form-control" name="address" placeholder="" v-model="mainData.memberData.address" v-bind:disabled="!mainData.isEdit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-primary m-1" v-if="!mainData.isEdit" v-on:click="editData">
+                                            <i class="bi bi-pencil-square"></i>
+                                            編輯
+                                        </button>
+                                        <button type="button" class="btn btn-primary m-1" v-if="mainData.isEdit" v-on:click="cancelEdit">
+                                            <i class="bi bi-x-circle"></i>
+                                            取消
+                                        </button>
+                                        <button type="button" class="btn btn-primary m-1" v-if="mainData.isEdit" v-on:click="saveData">
+                                            <i class="bi bi-check-lg"></i>
+                                            確認
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-5">
-                            <div class="mb-3">
-                                <label class="form-label">姓名：</label>
-                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.name">
-                            </div>
-                        </div>
-                        <div class="col-md-7">
-                            <div class="mb-3">
-                                <label class="form-label">電子郵件：</label>
-                                <input type="email" class="form-control" placeholder="" v-model="mainData.userData.id">
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="mb-3">
-                                <label class="form-label">國家：</label>
-                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.country">
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="mb-3">
-                                <label class="form-label">城市：</label>
-                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.city">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="mb-3">
-                                <label class="form-label">郵遞區號：</label>
-                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.zipCode">
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label">地址：</label>
-                                <input type="text" class="form-control" placeholder="" v-model="mainData.userData.address">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">手機號碼：</label>
-                                <input type="tel" class="form-control" placeholder="" v-model="mainData.userData.phone">
+            <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                <div class="row mb-3">
+                    <div class="col-md-12" style="overflow:auto;">
+                        <table id="orderTable" class="table table-bordered table-hover" style="width:100%">
+                        </table>
+                    </div>
+                </div>
+                <div class="row justify-content-end" v-for="item in mainData.orderRelationDatas">
+                    <div class="col-md-8">
+                        <hr />
+                    </div>
+                    <div class="col-md-5">
+                        <div class="text-end">
+                            <div class="row">
+                                <div class="col-4">
+                                    <img class="img-fluid m-2" v-bind:src="getImagePath(item.goodsData.imagePath)" alt="..." loading="lazy" />
+                                </div>
+                                <div class="col-8">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h6 class="card-title">
+                                                    <a href="#" class="text-decoration-none" v-on:click="getGoodsInfo(item.goodsData)">{{item.goodsData.goodName}}</a>
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-12 text-muted">
+                                                {{item.goodsData.sizeName}}
+                                            </div>
+                                            <div class="col-md-12 text-muted">
+                                                <i class="bi bi-x"></i>
+                                                {{item.orderQuantity}}
+                                            </div>
+                                            <div class="col-md-12">
+                                                {{getOrderItemPrice(item)}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -58,35 +145,129 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const { createApp, ref } = Vue;
-        async function loadData(_jsonParameter = '') {
-            var resultData = await $$ajaxPromise('/Account/GetUserData', _jsonParameter);
-            console.log(resultData.payload.userData);
-            const appMain = createApp({
-                data() {
-                    return {
-                        mainData: {
-                            userData: resultData.payload.userData
-                        }
-                    };
-                },
-                computed: {},
-                watch: {},
-                methods: {
-                    async gotoPage(itemObj) {
-                        // this.mainData.shopDtoData.currentPageNum = itemObj.pageNum;
-                        // var resultData = await $$ajaxPromise('/Shop/GetData', JSON.stringify(this.mainData.shopDtoData));
-                        // this.mainData = resultData.payload.shopViewModelData;
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'userInfoContainer';
+            var dts = new $$dataTables('/Order/GetOrderGrid', 'orderTable');
+            var paymentTypeCode = [];
+            var deliveryTypeCode = [];
+            var orderStateCode = [];
+            async function loadData(_parameter) {
+                var promiseArr = [
+                    $$ajaxPromise('/Home/GetCode', _parameter, 'POST', false),
+                    $$ajaxPromise('/Account/GetUserData', _parameter, 'POST', false)
+                ];
+                var resultDatas = await $$exePromise(promiseArr);
+                var countryOption = resultDatas[1].payload.countryDatas
+                    .map(x => new $$kv(x.countryCode, `${x.countryENName},${x.countryCHName}`, x.countryState != 1));
+                countryOption.unshift(new $$kv('', '請選擇'));
+                paymentTypeCode = resultDatas[0].payload.paymentTypeCode;
+                deliveryTypeCode = resultDatas[0].payload.deliveryTypeCode;
+                orderStateCode = resultDatas[0].payload.orderStateCode;
+                return {
+                    memberData: resultDatas[1].payload.memberData,
+                    countryOption: countryOption,
+                    orderRelationDatas: [],
+                    isEdit: false,
+                };
+            };
+            async function initApp(_modelData) {
+                if (_modelData == null)
+                    _modelData = await loadData();
+                const appMain = createApp({
+                    components: vueComponent,
+                    data() {
+                        return {
+                            mainData: _modelData,
+                        };
                     },
-                    async more() {
-                        console.log(123);
+                    computed: {},
+                    watch: {},
+                    methods: {
+                        editData: function () {
+                            this.mainData.isEdit = true;
+                        },
+                        saveData: async function() {
+                            var resultData = await $$ajaxPromise('/Account/SaveUserData', this.mainData.memberData);
+                            $$showMsg(resultData);
+                            if (resultData.state == 1) {
+                                this.cancelEdit();
+                            } else {
+                                $$showValidationResult(selfId, resultData.payload.validateDatas);
+                            }
+                        },
+                        cancelEdit: async function () {
+                            this.mainData = await loadData();
+                        },
+                        getOrderItemPrice: function(_item) {
+                            return '$ ' + $$toCurrency(_item.orderItemPrice);
+                        },
+                        getImagePath(_path) {
+                            return '/' + _path.replaceAll('\\', '/') + '/thumbnail_m.png?version=' + new Date().getTime();
+                        },
+                        getGoodsInfo: async function (_item) {
+                            _item.modalTitle = '商品內容';
+                            await $$openPanel('/Shop/LoadGoodsDetailModal', _item);
+                        },
+                        initDataTable: async function () {
+
+                            dts.tableRowId = 'orderId';
+                            dts.onSelected = async (_selectDatas) => {
+                                // console.log(_selectDatas);
+                                var resultData = await $$ajaxPromise('/Order/GetOrderRelationData', {
+                                    orderId: _selectDatas[0].orderId
+                                }, 'GET');
+                                console.log(resultData.payload.orderRelationDatas);
+                                this.mainData.orderRelationDatas = resultData.payload.orderRelationDatas;
+                            };
+                            dts.tableColumns = [
+                                { data: 'orderId', title: '訂單編號', width: '10%', className: 'text-start' },
+                                {
+                                    data: 'orderDate', title: '訂購日期', width: '15%', className: 'text-end', render: (data, type, row) => {
+                                        return moment(data).format('YYYY-MM-DD HH:mm:ss');
+                                    }
+                                },
+                                {
+                                    data: 'orderState', title: '訂購狀態', width: '15%', className: 'text-end', render: (data, type, row) => {
+                                        var findData = orderStateCode.find(x => x.varValue == data);
+                                        return findData == null ? '-' : findData.varNameCH;
+                                    }
+                                },
+                                {
+                                    data: 'paymentType', title: '付款方式', width: '15%', className: 'text-end', render: (data, type, row) => {
+                                        var findData = paymentTypeCode.find(x => x.varValue == data);
+                                        return findData == null ? '-' : findData.varNameCH;
+                                    }
+                                },
+                                {
+                                    data: 'deliveryType', title: '配送方式', width: '15%', className: 'text-end', render: (data, type, row) => {
+                                        var findData = deliveryTypeCode.find(x => x.varValue == data);
+                                        return findData == null ? '-' : findData.varNameCH;
+                                    }
+                                },
+                                {
+                                    data: 'orderFinishDate', title: '完成日期', width: '15%', className: 'text-end', render: (data, type, row) => {
+                                        return data == null ? '-' : moment(data).format('YYYY-MM-DD HH:mm:ss');
+                                    }
+                                },
+                                {
+                                    data: 'orderAmount', title: '訂單金額', width: '15%', className: 'text-end', render: (data, type, row) => {
+                                        return '$ ' + $$toCurrency(data);
+                                    }
+                                },
+                            ];
+                            await dts.loadTable();
+                        },
                     },
-                }
-            });
-            appMain.mount('#userInfoContainer');
-        }
-        await loadData();
-    });
-</script>
+                    mounted() {
+                        this.initDataTable();
+                    }
+                });
+                appMain.mount('#' + selfId);
+            };
+            await initApp();
+        });
+    </script>
+}

@@ -3,6 +3,10 @@
 }
 <div>
     <div id="homeContainer" class="carousel slide" data-bs-ride="carousel" style="height: 35rem;">
+        <div class="text-center">
+            <br />
+            <h2>--網站測試中--</h2>
+        </div>
         <div class="carousel-indicators">
             <button type="button" data-bs-target="#homeContainer" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
             <button type="button" data-bs-target="#homeContainer" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -28,22 +32,22 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
-    <div class="text-center">
-        <br />
-        <h2>--網站測試中--</h2>
-    </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const { createApp, ref } = Vue;
-        const appMain = createApp({
-            data() {
-                return {
+
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'homeContainer';
+            const appMain = createApp({
+                data() {
+                    return {
+                    }
+                },
+                methods: {
                 }
-            },
-            methods: {
-            }
+            });
+            appMain.mount('#' + selfId);
         });
-        appMain.mount('#homeContainer');
-    });
-</script>
+    </script>
+}

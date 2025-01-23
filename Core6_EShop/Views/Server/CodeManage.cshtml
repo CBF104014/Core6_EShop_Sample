@@ -8,13 +8,13 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingOne">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                    <strong>附 件 上 傳</strong>
+                    <strong>附件上傳</strong>
                 </button>
             </h2>
             <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
                 <div class="accordion-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-6 d-none">
                             <div class="card">
                                 <div class="card-body">
                                     <video height="200" id="sampleVideo" controls style="width:100%">
@@ -24,12 +24,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12 mb-3">
                             <div class="input-group">
-                                <input type="file" class="form-control" v-on:change="fileGetData">
-                                <button class="btn btn-secondary" type="button" v-on:click="filePreView">預覽檔案</button>
-                                <button class="btn btn-secondary" type="button" v-on:click="upload">上傳檔案</button>
+                                <input type="file" class="form-control" v-on:change="fileGetData" multiple>
+                                @* <button class="btn btn-secondary" type="button" v-on:click="filePreView">預覽檔案</button> *@
+                                @* <button class="btn btn-secondary" type="button" v-on:click="upload">上傳檔案</button> *@
                             </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <button class="btn btn-secondary" type="button" v-on:click="upload">上傳檔案</button>
                         </div>
                     </div>
                 </div>
@@ -38,33 +41,24 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo">
-                    <strong>附 件 資 料</strong>
+                    <strong>附件資料</strong>
                 </button>
             </h2>
             <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTwo">
                 <div class="accordion-body">
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <button class="btn btn-secondary" type="button" v-on:click="getVideo">取資料</button>
+                        <div class="col-md-auto">
+                            <button class="btn btn-secondary" type="button" v-on:click="getImageOther">取資料</button>
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <template v-for="(item, index) in mainData.videoDatas">
+                        <template v-for="(item, index) in mainData.imageFiles">
                             <div class="col-lg-4 col-sm-6">
                                 <div class="card mb-3">
-                                    <video controls>
-                                        <source :src="item.videoSrc" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                    <div class="card-footer">
-                                        <div class="row">
-                                            <div class="col-md-auto">
-                                                <button class="btn btn-danger mr-1" type="button" v-on:click="deleteVideo(item)">刪除</button>
-                                            </div>
-                                            <div class="col-md-auto align-self-center">
-                                                <label>{{item.name}}</label>
-                                            </div>
-                                        </div>
+                                    <img v-bind:src="item.path" class="card-img-top" alt="..." loading="lazy" />
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{item.name}}</h5>
+                                        <button class="btn btn-danger" type="button" v-on:click="deleteImageOther(item)">刪除</button>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +72,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
         const { createApp, ref } = Vue;
-        async function loadData(_jsonParameter = '') {
+        async function loadData(_modelData = {}) {
             var resultData = {
                 codeData: {
                     fileData: new $$fileBase(),
@@ -92,8 +86,9 @@
                 data() {
                     return {
                         mainData: {
+                            fileDatas: [],
                             codeData: resultData.codeData,
-                            videoDatas: [],
+                            imageFiles: [],
                         }
                     };
                 },
@@ -108,31 +103,37 @@
                 },
                 methods: {
                     fileGetData: async function (element) {
-                        var rs = await this.mainData.codeData.fileData.GetFile(element);
-                        document.getElementById('sampleVideo').load();
-                        console.log(rs);
-                        if (rs != true)
-                            return;
+                        this.mainData.fileDatas = [];
+                        for (var i = 0; i < element.target.files.length; i++) {
+                            var itemFile = new $$fileBase();
+                            var rs = await itemFile.GetFile(element.target.files[i]);
+                            this.mainData.fileDatas.push(itemFile);
+                            console.log(rs);
+                        }
+                        // GetFile(element.target.files[0]);
+                        // var rs = await this.mainData.codeData.fileData.GetFile(element);
+                        // document.getElementById('sampleVideo').load();
+                        // console.log(rs);
+                        // if (rs != true)
+                        //     return;
                     },
                     filePreView: function (element) {
                         this.mainData.codeData.fileData.PreView();
                     },
                     upload: async function (str) {
-                        //TODO
-                        var resultData = await $$ajaxPromise('/Server/UploadVideo', JSON.stringify(this.mainData.codeData));
+                        console.log(this.mainData.fileDatas);
+                        var resultData = await $$ajaxPromise('/Server/UploadOther', this.mainData.fileDatas);
                         $$showMsg(resultData);
                     },
-                    getVideo: async function () {
-                        var resultData = await $$ajaxPromise('/Server/GetAllVideo');
-                        // console.log(resultData);
-                        this.mainData.videoDatas = resultData.payload.viedoFiles;
+                    getImageOther: async function () {
+                        var resultData = await $$ajaxPromise('/Server/GetAllOtherFile');
+                        this.mainData.imageFiles = resultData.payload.imageFiles;
                     },
-                    deleteVideo: async function (_param) {
-                        var resultData = await $$ajaxPromise('/Server/DeleteVideo', JSON.stringify(_param));
-                        // console.log(resultData);
+                    deleteImageOther: async function (_param) {
+                        var resultData = await $$ajaxPromise('/Server/DeleteImageOther', _param);
                         $$showMsg(resultData);
-                        this.getVideo();
-                    }
+                        this.getImageOther();
+                    },
                 }
             });
             appMain.mount('#codeManageContainer');

@@ -1,55 +1,100 @@
+using Core6_EShop.Cls;
+using Core6_EShop.Repository.Implement;
 using Core6_EShop.Service.Implement;
-using Core6_EShop.Service.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using System.Security.Claims;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+/// 注意：
+/// 寫入附件的資料權限須開啟
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+    //code init
+    Code.InitCode(builder.Configuration);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddTransient<MemberService>();
-builder.Services.AddTransient<GoodsService>();
-builder.Services.AddTransient<CartService>();
-//JWT驗證
-var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value);
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false; // Disable in production
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
+    //log
+    Log.Logger = new LoggerConfiguration()
+        .ReadFrom
+        .Configuration(builder.Configuration)
+        .CreateLogger();
+    builder.Host.UseSerilog();
+
+    //repository
+    builder.Services.AddScoped<SettingRepository>();
+    builder.Services.AddScoped<MemberRepository>();
+    builder.Services.AddScoped<GoodsRepository>();
+    builder.Services.AddScoped<CartRepository>();
+    builder.Services.AddScoped<GoodsRelationRepository>();
+    builder.Services.AddScoped<GoodsSizeRepository>();
+    builder.Services.AddScoped<CountryRepository>();
+    builder.Services.AddScoped<OrderRepository>();
+    builder.Services.AddScoped<OrderRelationRepository>();
+
+    //services
+    builder.Services.AddScoped<SettingService>();
+    builder.Services.AddScoped<MemberService>();
+    builder.Services.AddScoped<GoodsService>();
+    builder.Services.AddScoped<CartService>();
+    builder.Services.AddScoped<GoodsRelationService>();
+    builder.Services.AddScoped<GoodsSizeService>();
+    builder.Services.AddScoped<CountryService>();
+    builder.Services.AddScoped<OrderService>();
+    builder.Services.AddScoped<OrderRelationService>();
+
+    //jwt
+    builder.Services
+        .AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                RoleClaimType = ClaimTypes.Role,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Code.tokenKey)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+            };
+        });
+
+    //request size limit
+    builder.WebHost.ConfigureKestrel(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false, // Set to true in production
-        ValidateAudience = false, // Set to true in production
-    };
-});
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
+        options.Limits.MaxRequestBodySize = Code.appMaxRequestBodySize;
+    });
+    builder.Services.AddControllersWithViews();
+    //app build
+    var app = builder.Build();
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.Use(async (context, next) =>
+    {
+        var jwtToken = context.Request.Cookies["jwtToken"];
+        if (!String.IsNullOrEmpty(jwtToken) && !context.Request.Headers.Any(x => x.Key == "Authorization"))
+            context.Request.Headers.Add("Authorization", "Bearer " + jwtToken);
+        await next();
+    });
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+    app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+    app.Run();
+}
+catch (Exception ex)
+{
+    throw ex;
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.Run();
+#region function
+#endregion

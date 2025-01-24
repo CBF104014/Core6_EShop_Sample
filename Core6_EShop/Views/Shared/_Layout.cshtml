@@ -61,6 +61,10 @@
                         <div class="dropdown">
                             <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person fs-5 mx-1"></i>
+                                @if (User.IsInRole("admin"))
+                                {
+                                    <span class="mx-1 text-danger fw-bold">(管理者)</span>
+                                }
                                 <span class="mx-1" v-cloak>{{userId}}</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="accountDropdown">

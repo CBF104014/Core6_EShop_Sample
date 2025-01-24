@@ -210,6 +210,10 @@ namespace Core6_EShop.Repository.Implement
                 {
                     goodsData.gId = await GetNewGId(conn: conn, tran: tran);
                     await Create(goodsData.Mapping<Goods>(), conn: conn, tran: tran);
+                    foreach (var item in goodsData.goodsSizeDatas)
+                    {
+                        item.gId = goodsData.gId;
+                    }
                     await goodsRelationRepository.AddRelation(goodsData.goodsSizeDatas, conn: conn, tran: tran);
                     await AddImage(_env, goodsData);
                     tran.Commit();

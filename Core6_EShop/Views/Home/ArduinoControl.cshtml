@@ -1,0 +1,208 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<div id="arduinoControlContainer" v-cloak>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="port4" v-model="mainData.arduinoA1Data.port4" v-on:change="putArduinoA1Data">
+                <label class="form-check-label" for="port4">
+                    port4(D4)
+                </label>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="port5" v-model="mainData.arduinoA1Data.port5" v-on:change="putArduinoA1Data">
+                <label class="form-check-label" for="port5">
+                    port5(D5) 暫停
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-lg-3 col-md-4 col-5">
+            <div class="row">
+                <div class="col-md-12 mb-1">
+                    <label>servo1SpeedL：</label>
+                </div>
+                <div class="col-md-12 mb-1">
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary" type="button" v-on:click="speedLAdd(-1)">-</button>
+                        <integer-only class="form-control" v-model="mainData.arduinoA1Data.servo1SpeedL"></integer-only>
+                        <button class="btn btn-outline-secondary" type="button" v-on:click="speedLAdd(1)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-primary w-100" type="button" v-on:click="turnLeft">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        左轉
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-2 col-2">
+            <div class="row justify-content-center">
+                <div class="col-md-auto p-0">
+                    <button class="btn btn-primary m-1" type="button" v-on:click="setDefault">
+                        <i class="bi bi-arrow-up-circle"></i>
+                        前進
+                    </button>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto p-0">
+                    <button class="btn btn-primary m-1" type="button" v-on:click="moveForward(10)">
+                        <i class="bi bi-plus-circle"></i>
+                        加速
+                    </button>
+                </div>
+                <div class="col-md-auto p-0">
+                    <button class="btn btn-primary m-1" type="button" v-on:click="moveForward(-10)">
+                        <i class="bi bi-dash-circle"></i>
+                        減速
+                    </button>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto p-0">
+                    <button class="btn btn-primary m-1" type="button" v-on:click="moveBackward">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        後退
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-4 col-5">
+            <div class="row">
+                <div class="col-md-12 mb-1">
+                    <label>servo1SpeedR：</label>
+                </div>
+                <div class="col-md-12 mb-1">
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary" type="button" v-on:click="speedRAdd(-1)">-</button>
+                        <integer-only class="form-control" v-model="mainData.arduinoA1Data.servo1SpeedR"></integer-only>
+                        <button class="btn btn-outline-secondary" type="button" v-on:click="speedRAdd(1)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-primary w-100" type="button" v-on:click="turnRight">
+                        右轉
+                        <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3 mb-2">
+        <div class="col-12 mb-1">
+            <hr />
+        </div>
+        <div class="col-auto mb-1">
+            <button class="btn btn-primary" type="button" v-on:click="putArduinoA1Data">
+                <i class="bi bi-floppy me-1"></i>
+                更新資料
+            </button>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        $(document).ready(async function () {
+            const { createApp, ref } = Vue;
+            const selfId = 'arduinoControlContainer';
+            async function loadData(_parameter) {
+                var resultData = await $$ajaxPromise('/Home/GetArduinoA1Data', _parameter, 'GET');
+                // console.log(resultData);
+                return {
+                    arduinoA1Data: resultData,
+                    lastRequestTime: 0,
+                };
+            };
+            async function initApp(_modelData) {
+                if (_modelData == null)
+                    _modelData = await loadData({ userId: 'goose' });
+                const appMain = createApp({
+                    components: vueComponent,
+                    data() {
+                        return {
+                            mainData: _modelData,
+                        };
+                    },
+                    computed: {},
+                    watch: {
+                        'mainData.arduinoA1Data.servo1SpeedL'(newVal, oldVal) {
+                            this.putArduinoA1Data();
+                        },
+                        'mainData.arduinoA1Data.servo1SpeedR'(newVal, oldVal) {
+                            this.putArduinoA1Data();
+                        },
+                    },
+                    methods: {
+                        speedLAdd: function (_val) {
+                            this.mainData.arduinoA1Data.servo1SpeedL += _val;
+                        },
+                        speedRAdd: function (_val) {
+                            this.mainData.arduinoA1Data.servo1SpeedR += _val;
+                        },
+                        moveForward: function (_add) {
+                            //加速 R- L+
+                            //加速 R+ L-
+                            this.speedLAdd(_add);
+                            this.speedRAdd(-1 * _add);
+                        },
+                        moveBackward: function () {
+                            //後退 L1 R180
+                            this.mainData.arduinoA1Data.servo1SpeedL = 1;
+                            this.mainData.arduinoA1Data.servo1SpeedR = 180;
+                        },
+                        turnLeft: function () {
+                            //原地左轉 L90 R1
+                            this.mainData.arduinoA1Data.servo1SpeedL = 90;
+                            this.mainData.arduinoA1Data.servo1SpeedR = 1;
+                        },
+                        turnRight: function () {
+                            //原地右轉 L180 R91
+                            this.mainData.arduinoA1Data.servo1SpeedL = 180;
+                            this.mainData.arduinoA1Data.servo1SpeedR = 91;
+                        },
+                        setDefault: function () {
+                            this.mainData.arduinoA1Data.port4 = true;
+                            this.mainData.arduinoA1Data.port5 = true;
+                            this.mainData.arduinoA1Data.servo1SpeedL = 110;
+                            this.mainData.arduinoA1Data.servo1SpeedR = 60;
+                            this.putArduinoA1Data();
+                        },
+                        putArduinoA1Data: function () {
+                            const currentTime = Date.now();
+                            if (currentTime - this.mainData.lastRequestTime >= 200) {
+                                this.mainData.lastRequestTime = currentTime;
+                                $.ajax({
+                                    type: "POST",
+                                    url: '/Home/PutArduinoA1Data',
+                                    data: JSON.stringify(this.mainData.arduinoA1Data),
+                                    contentType: "application/json",
+                                    success: function (rs) {
+                                        $$showToast({ title: rs == true ? '成功' : '失敗' });
+                                        // console.log(rs);
+                                    },
+                                    error: function (rs) {
+                                        $$showToast({ title: '失敗' });
+                                        console.log(rs);
+                                    }
+                                });
+                            }
+                        },
+                    }, 
+                    mounted() { }
+                });
+                appMain.mount('#' + selfId);
+            };
+            await initApp();
+        });
+    </script>
+}

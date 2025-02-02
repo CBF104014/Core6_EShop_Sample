@@ -22,11 +22,11 @@ namespace Core6_EShop.Repository.Implement
         }
         public async Task<Member> SelByEmail(string email)
         {
-            return await SelFirst<Member>($"email=@email", new { email });
+            return await SelFirstAsync<Member>($"email=@email", new { email });
         }
         public async Task<Member> SelById(int memberId)
         {
-            return await SelFirst<Member>($"memberId=@memberId", new { memberId });
+            return await SelFirstAsync<Member>($"memberId=@memberId", new { memberId });
         }
     }
 }

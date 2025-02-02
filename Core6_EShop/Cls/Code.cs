@@ -77,7 +77,7 @@ namespace Core6_EShop.Cls
             public static TableCodeDto Country { get; } = new TableCodeDto("Country", $"{dbCode.GooseDB}.{systemCode.EShop}_Country");
             public static TableCodeDto Order { get; } = new TableCodeDto("Order", $"{dbCode.GooseDB}.{systemCode.EShop}_Order");
             public static TableCodeDto OrderRelation { get; } = new TableCodeDto("OrderRelation", $"{dbCode.GooseDB}.{systemCode.EShop}_OrderRelation");
-            //public static TableCodeDto Get() { }
+            public static TableCodeDto Arduinoa1 { get; } = new TableCodeDto("Arduinoa1", $"{dbCode.GooseDB}.Arduinoa1");
         }
         /// <summary>
         /// 商品排序代碼

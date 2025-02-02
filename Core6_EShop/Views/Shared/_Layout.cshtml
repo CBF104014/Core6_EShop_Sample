@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/lib/datatables/datatables.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Core6_EShop.styles.css" asp-append-version="true" />
     <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
 </head>
 <body>
@@ -47,6 +46,12 @@
                                 <a class="nav-link fw-bold text-danger" asp-area="" asp-controller="Server" asp-action="GoodsManage">
                                     <i class="bi bi-gear"></i>
                                     商品管理
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold text-danger" asp-area="" asp-controller="Home" asp-action="ArduinoControl">
+                                    <i class="bi bi-gear"></i>
+                                    Arduino
                                 </a>
                             </li>
                             <li class="nav-item d-none">
@@ -198,8 +203,13 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            
+        <div class="container mt-2">
+            @if (User.IsInRole("admin"))
+            {
+                <span class="text-danger fw-bold">
+                    環境：@Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                </span>
+            }
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

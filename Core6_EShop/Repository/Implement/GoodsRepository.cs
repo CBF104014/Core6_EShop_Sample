@@ -47,7 +47,7 @@ namespace Core6_EShop.Repository.Implement
         public async Task<GoodsFileViewModel> SelByGId(int gId, IWebHostEnvironment env)
         {
             
-            var goodsTask = SelFirst<GoodsFileViewModel>("gId=@gId", new { gId });
+            var goodsTask = SelFirstAsync<GoodsFileViewModel>("gId=@gId", new { gId });
             var goodsRelationTask = goodsRelationRepository.SelByGIdToViewModel(gId);
             await Task.WhenAll(goodsTask, goodsRelationTask);
             if (goodsTask.Result == null)

@@ -25,14 +25,14 @@ namespace Core6_EShop.Repository.Base
                 .Where(x => x.Name.ToLower() != "rankey")
                 .Select(x => x.Name);
         }
-        public Task<T> SelByRankey(long rankey, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<T> SelByRankey(long rankey, IDbConnection conn = null, IDbTransaction tran = null)
         {
-            return SelFirst<T>("rankey=@rankey", new { rankey }, conn, tran);
+            return await SelFirstAsync<T>("rankey=@rankey", new { rankey }, conn, tran);
         }
-        public Task<IEnumerable<T1>> SelAllAsync<T1>(int start = 0, int count = 0, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<IEnumerable<T1>> SelAllAsync<T1>(int start = 0, int count = 0, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var sqlCmd = $"select * from {this.fullName} {(count == 0 ? "" : $"limit @start,@count")}";
-            return QueryAsync<T1>(sqlCmd, new { start, count }, conn, tran);
+            return await QueryAsync<T1>(sqlCmd, new { start, count }, conn, tran);
         }
         public IEnumerable<T1> SelAll<T1>(int start = 0, int count = 0, IDbConnection conn = null, IDbTransaction tran = null)
         {
@@ -56,14 +56,14 @@ namespace Core6_EShop.Repository.Base
         /// <summary>
         /// 新增
         /// </summary>
-        public Task<int> Create(T data, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> Create(T data, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var columnCmdStr = String.Join(",", propertyDatas.Select(x => $"`{x}`"));
             var valueCmdStr = String.Join(",", propertyDatas.Select(x => $"@{x}"));
             var sqlCmd = $"insert into {this.fullName} ({columnCmdStr}) values ({valueCmdStr});";
-            return this.Execute(sqlCmd, data, conn, tran);
+            return await this.Execute(sqlCmd, data, conn, tran);
         }
-        public Task<int> Create(IEnumerable<T> datas, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> Create(IEnumerable<T> datas, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var columnCmdStr = String.Join(",", propertyDatas.Select(x => $"`{x}`"));
             var count = datas.Count();
@@ -81,21 +81,21 @@ namespace Core6_EShop.Repository.Base
                 }
                 sqlCmd += $"insert into {this.fullName} ({columnCmdStr}) values ({valueCmdStr}); \r\n";
             }
-            return this.Execute(sqlCmd, sqlParameter, conn, tran);
+            return await this.Execute(sqlCmd, sqlParameter, conn, tran);
         }
         /// <summary>
         /// 刪除
         /// </summary>
-        public Task<int> Delete(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> Delete(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var sqlCmd = $"delete from {this.fullName} {(String.IsNullOrEmpty(whereCmd) ? "" : $"where {whereCmd}")};";
-            return this.Execute(sqlCmd, sqlParam, conn, tran);
+            return await this.Execute(sqlCmd, sqlParam, conn, tran);
         }
-        public Task<int> DelByRankey(long rankey, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> DelByRankey(long rankey, IDbConnection conn = null, IDbTransaction tran = null)
         {
-            return this.Delete("rankey=@rankey", new { rankey }, conn, tran);
+            return await this.Delete("rankey=@rankey", new { rankey }, conn, tran);
         }
-        public Task<int> DelByRankeys(IEnumerable<long> rankeyDatas, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> DelByRankeys(IEnumerable<long> rankeyDatas, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var sqlParameter = new Dictionary<string, object>();
             foreach (var item in rankeyDatas)
@@ -103,23 +103,25 @@ namespace Core6_EShop.Repository.Base
                 sqlParameter.Add($"rankey_{item}", item);
             }
             var whereCmd = $"rankey in ({String.Join(",", sqlParameter.Select(x => $"@{x.Key}"))})";
-            return Delete(whereCmd, sqlParameter, conn: conn, tran: tran);
+            return await Delete(whereCmd, sqlParameter, conn: conn, tran: tran);
         }
         /// <summary>
         /// 執行
         /// </summary>
-        public Task<int> Execute(string sqlCmd, object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> Execute(string sqlCmd, object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             if (conn == null)
             {
                 using (conn = GetConnection())
                 {
-                    return conn.ExecuteAsync(sqlCmd, sqlParam, transaction: tran);
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
+                    return await conn.ExecuteAsync(sqlCmd, sqlParam, transaction: tran);
                 }
             }
             else
             {
-                return conn.ExecuteAsync(sqlCmd, sqlParam, transaction: tran);
+                return await conn.ExecuteAsync(sqlCmd, sqlParam, transaction: tran);
             }
         }
         /// <summary>
@@ -131,6 +133,8 @@ namespace Core6_EShop.Repository.Base
             {
                 using (conn = GetConnection())
                 {
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
                     return conn.Query<T1>(sqlCmd, sqlParam, transaction: tran);
                 }
             }
@@ -142,63 +146,67 @@ namespace Core6_EShop.Repository.Base
         /// <summary>
         /// 查詢多筆-整個SQL語法
         /// </summary>
-        public Task<IEnumerable<T1>> QueryAsync<T1>(string sqlCmd, object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<IEnumerable<T1>> QueryAsync<T1>(string sqlCmd, object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             if (conn == null)
             {
                 using (conn = GetConnection())
                 {
-                    return conn.QueryAsync<T1>(sqlCmd, sqlParam, transaction: tran);
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
+                    return await conn.QueryAsync<T1>(sqlCmd, sqlParam, transaction: tran);
                 }
             }
             else
             {
-                return conn.QueryAsync<T1>(sqlCmd, sqlParam, transaction: tran);
+                return await conn.QueryAsync<T1>(sqlCmd, sqlParam, transaction: tran);
             }
         }
         /// <summary>
         /// 查詢單筆-整個SQL語法
         /// </summary>
-        public Task<T1> QueryFirstAsync<T1>(string sqlCmd, object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<T1> QueryFirstAsync<T1>(string sqlCmd, object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             if (conn == null)
             {
                 using (conn = GetConnection())
                 {
-                    return conn.QueryFirstOrDefaultAsync<T1>(sqlCmd, sqlParam, transaction: tran);
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
+                    return await conn.QueryFirstOrDefaultAsync<T1>(sqlCmd, sqlParam, transaction: tran);
                 }
             }
             else
             {
-                return conn.QueryFirstOrDefaultAsync<T1>(sqlCmd, sqlParam, transaction: tran);
+                return await conn.QueryFirstOrDefaultAsync<T1>(sqlCmd, sqlParam, transaction: tran);
             }
         }
         /// <summary>
         /// 查詢多筆-WHERE語法
         /// </summary>
-        public Task<IEnumerable<T1>> SelAsync<T1>(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<IEnumerable<T1>> SelAsync<T1>(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var sqlCmd = $"select * from {this.fullName} {(String.IsNullOrEmpty(whereCmd) ? "" : $"where {whereCmd}")}";
-            return QueryAsync<T1>(sqlCmd, sqlParam, conn, tran);
+            return await QueryAsync<T1>(sqlCmd, sqlParam, conn, tran);
         }
         /// <summary>
         /// 查詢單筆-WHERE語法
         /// </summary>
-        public Task<T1> SelFirst<T1>(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<T1> SelFirstAsync<T1>(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var sqlCmd = $"select * from {this.fullName} {(String.IsNullOrEmpty(whereCmd) ? "" : $"where {whereCmd}")} limit 1";
-            return QueryFirstAsync<T1>(sqlCmd, sqlParam, conn, tran);
+            return await QueryFirstAsync<T1>(sqlCmd, sqlParam, conn, tran);
         }
         /// <summary>
         /// 更新資料
         /// </summary>
-        public Task<int> Update(T data, string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> Update(T data, string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var columnCmdStr = String.Join(",", propertyDatas.Select(x => $"`{x}`=@{x}"));
             var sqlCmd = $"update {this.fullName} set {columnCmdStr} {(String.IsNullOrEmpty(whereCmd) ? "" : $"where {whereCmd}")};";
             if (sqlParam == null)
             {
-                return this.Execute(sqlCmd, data, conn, tran);
+                return await this.Execute(sqlCmd, data, conn, tran);
             }
             else
             {
@@ -206,29 +214,31 @@ namespace Core6_EShop.Repository.Base
                     .Concat(sqlParam.Mapping<Dictionary<string, object>>())
                     .GroupBy(kv => kv.Key)
                     .ToDictionary(g => g.Key, g => g.Last().Value);
-                return this.Execute(sqlCmd, updData, conn, tran);
+                return await this.Execute(sqlCmd, updData, conn, tran);
             }
         }
-        public Task<int> UpdByRankey(T data, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> UpdByRankey(T data, IDbConnection conn = null, IDbTransaction tran = null)
         {
-            return this.Update(data, "rankey=@rankey", null, conn, tran);
+            return await this.Update(data, "rankey=@rankey", null, conn, tran);
         }
         /// <summary>
         /// 查詢筆數
         /// </summary>
-        public Task<int> GetCount(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
+        public async Task<int> GetCount(string whereCmd = "", object sqlParam = null, IDbConnection conn = null, IDbTransaction tran = null)
         {
             var sqlCmd = $"select ifnull(count(*),0) count from {this.fullName}";
             if (conn == null)
             {
                 using (conn = GetConnection())
                 {
-                    return conn.ExecuteScalarAsync<int>(sqlCmd, sqlParam, transaction: tran);
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
+                    return await conn.ExecuteScalarAsync<int>(sqlCmd, sqlParam, transaction: tran);
                 }
             }
             else
             {
-                return conn.ExecuteScalarAsync<int>(sqlCmd, sqlParam, transaction: tran);
+                return await conn.ExecuteScalarAsync<int>(sqlCmd, sqlParam, transaction: tran);
             }
         }
         /// <summary>

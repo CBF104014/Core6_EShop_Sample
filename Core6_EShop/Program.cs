@@ -12,6 +12,11 @@ using System.Text;
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    //appsettings
+    builder.Configuration
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
     //code init
     Code.InitCode(builder.Configuration);
 
@@ -32,6 +37,7 @@ try
     builder.Services.AddScoped<CountryRepository>();
     builder.Services.AddScoped<OrderRepository>();
     builder.Services.AddScoped<OrderRelationRepository>();
+    builder.Services.AddScoped<ArduinoA1Repository>();
 
     //services
     builder.Services.AddScoped<SettingService>();
@@ -43,6 +49,7 @@ try
     builder.Services.AddScoped<CountryService>();
     builder.Services.AddScoped<OrderService>();
     builder.Services.AddScoped<OrderRelationService>();
+    builder.Services.AddScoped<ArduinoA1Service>();
 
     //jwt
     builder.Services

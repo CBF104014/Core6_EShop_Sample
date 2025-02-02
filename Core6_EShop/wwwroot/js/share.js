@@ -73,26 +73,31 @@ async function $$openPanel(_partialViewPath, _viewParameter = {}) {
         }
         var myModal = new bootstrap
             .Modal(cloneModalElement, {});
+        //關閉時
         cloneModalElement
             .addEventListener('hidden.bs.modal', function (event) {
                 cloneModalElement.remove();
                 resolve();
             });
+        //開啟時
+        cloneModalElement
+            .addEventListener('shown.bs.modal', function (event) {
+                //標頭(modalTitle)
+                if (_viewParameter.modalTitle != null) {
+                    $(cloneModalElement)
+                        .find('.modal-title')
+                        .text(_viewParameter.modalTitle);
+                } else {
+                    $(cloneModalElement)
+                        .find('.modal-title')
+                        .text('');
+                }
+                //內容
+                $(cloneModalElement)
+                    .find('.modal-body')
+                    .load(_partialViewPath, _viewParameter, () => { });
+            });
         myModal.show();
-        //標頭(modalTitle)
-        if (_viewParameter.modalTitle != null) {
-            $(cloneModalElement)
-                .find('.modal-title')
-                .text(_viewParameter.modalTitle);
-        } else {
-            $(cloneModalElement)
-                .find('.modal-title')
-                .text('');
-        }
-        //內容
-        $(cloneModalElement)
-            .find('.modal-body')
-            .load(_partialViewPath, _viewParameter, () => { });
     });
 }
 //關閉視窗
